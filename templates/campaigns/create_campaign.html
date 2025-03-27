@@ -2,13 +2,425 @@
 <html>
 <head>
     <title>Create Campaign</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f6f9fc 0%, #eef2f7 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: #2d3748;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            color: #2d3748;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: #718096;
+            font-size: 1rem;
+        }
+
+        .form-container {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            color: #4a5568;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .form-group input[type="text"],
+        .form-group textarea,
+        .form-group select,
+        .form-group input[type="date"] {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            color: #2d3748;
+            transition: all 0.2s;
+            background-color: #f8fafc;
+        }
+
+        .form-group input[type="text"]:focus,
+        .form-group textarea:focus,
+        .form-group select:focus,
+        .form-group input[type="date"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            background-color: white;
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-group .help-text {
+            color: #718096;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+
+        .form-group .error-message {
+            color: #e53e3e;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .form-group.error input[type="text"],
+        .form-group.error textarea,
+        .form-group.error select {
+            border-color: #e53e3e;
+        }
+
+        .form-group.error .error-message {
+            display: block;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(102, 126, 234, 0.2);
+        }
+
+        .btn-secondary {
+            background: #f7fafc;
+            color: #4a5568;
+            border: 1px solid #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            background: #edf2f7;
+            color: #2d3748;
+        }
+
+        .preview-section {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .preview-section h2 {
+            color: #2d3748;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .preview-card {
+            background: #f8fafc;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .preview-card h3 {
+            color: #2d3748;
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .preview-card p {
+            color: #4a5568;
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                margin: 1rem auto;
+            }
+
+            .form-container {
+                padding: 1.5rem;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+
+        .form-group input[type="date"] {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            color: #2d3748;
+            transition: all 0.2s;
+            background-color: #f8fafc;
+            cursor: pointer;
+            position: relative;
+            padding-right: 2.5rem;
+        }
+
+        .form-group input[type="date"]::-webkit-calendar-picker-indicator {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%234a5568' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2' ry='2'%3E%3C/rect%3E%3Cline x1='16' y1='2' x2='16' y2='6'%3E%3C/line%3E%3Cline x1='8' y1='2' x2='8' y2='6'%3E%3C/line%3E%3Cline x1='3' y1='10' x2='21' y2='10'%3E%3C/line%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: center;
+            cursor: pointer;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .form-group input[type="date"]:hover::-webkit-calendar-picker-indicator {
+            opacity: 1;
+        }
+
+        .form-group input[type="date"]:focus::-webkit-calendar-picker-indicator {
+            opacity: 1;
+        }
+
+        .form-group input[type="date"]::-webkit-datetime-edit {
+            padding: 0;
+        }
+
+        .form-group input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+            padding: 0;
+        }
+
+        .form-group input[type="date"]::-webkit-datetime-edit-text {
+            color: #4a5568;
+        }
+
+        .form-group input[type="date"]::-webkit-datetime-edit-month-field,
+        .form-group input[type="date"]::-webkit-datetime-edit-day-field,
+        .form-group input[type="date"]::-webkit-datetime-edit-year-field {
+            color: #2d3748;
+            font-weight: 500;
+            padding: 0 0.25rem;
+        }
+
+        .form-group input[type="date"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            background-color: white;
+        }
+
+        /* Date input placeholder styling */
+        .form-group input[type="date"]:invalid::-webkit-datetime-edit {
+            color: #a0aec0;
+        }
+
+        /* Firefox specific styles */
+        .form-group input[type="date"] {
+            color-scheme: light;
+        }
+
+        .form-group input[type="date"]::-moz-calendar-picker-indicator {
+            filter: invert(0.4);
+        }
+
+        .form-group input[type="date"]:hover::-moz-calendar-picker-indicator {
+            filter: invert(0.6);
+        }
+
+        .form-group input[type="date"]:focus::-moz-calendar-picker-indicator {
+            filter: invert(0.6);
+        }
+    </style>
 </head>
 <body>
-    <h1>Create Campaign</h1>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Create Campaign</button>
-    </form>
+    <div class="container">
+        <div class="header">
+            <h1>Create New Campaign</h1>
+            <p>Set up your referral campaign and start growing your customer base</p>
+        </div>
+
+        <div class="form-container">
+            <form method="post" id="campaignForm">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="title">Campaign Title</label>
+                    <input type="text" id="title" name="title" required>
+                    <div class="help-text">Give your campaign a clear, memorable name</div>
+                    <div class="error-message">Please enter a campaign title</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Campaign Description</label>
+                    <textarea id="description" name="description" required></textarea>
+                    <div class="help-text">Describe what makes this campaign special and why customers should participate</div>
+                    <div class="error-message">Please enter a campaign description</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="start_date">Start Date</label>
+                    <input type="date" id="start_date" name="start_date" required min="">
+                    <div class="help-text">When should the campaign begin?</div>
+                    <div class="error-message">Please select a start date</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="end_date">End Date</label>
+                    <input type="date" id="end_date" name="end_date" required min="">
+                    <div class="help-text">When should the campaign end?</div>
+                    <div class="error-message">Please select an end date</div>
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-check"></i>
+                        Create Campaign
+                    </button>
+                    <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i>
+                        Cancel
+                    </a>
+                </div>
+            </form>
+
+            <div class="preview-section">
+                <h2>Campaign Preview</h2>
+                <div class="preview-card">
+                    <h3 id="preview-title">Campaign Title</h3>
+                    <p id="preview-description">Campaign description will appear here...</p>
+                    <p id="preview-dates">Duration: <span id="preview-dates-value"></span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set minimum date to today for both date inputs
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('start_date').min = today;
+        document.getElementById('end_date').min = today;
+
+        // Update end date minimum when start date changes
+        document.getElementById('start_date').addEventListener('change', function() {
+            document.getElementById('end_date').min = this.value;
+            if (document.getElementById('end_date').value && 
+                document.getElementById('end_date').value < this.value) {
+                document.getElementById('end_date').value = this.value;
+            }
+        });
+
+        // Form validation and preview
+        const form = document.getElementById('campaignForm');
+        const inputs = form.querySelectorAll('input, textarea, select');
+        const previewTitle = document.getElementById('preview-title');
+        const previewDescription = document.getElementById('preview-description');
+        const previewDatesValue = document.getElementById('preview-dates-value');
+
+        function updatePreview() {
+            const title = document.getElementById('title').value || 'Campaign Title';
+            const description = document.getElementById('description').value || 'Campaign description will appear here...';
+            const startDate = document.getElementById('start_date').value;
+            const endDate = document.getElementById('end_date').value;
+
+            previewTitle.textContent = title;
+            previewDescription.textContent = description;
+
+            if (startDate && endDate) {
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                const formattedStart = start.toLocaleDateString('en-US', options);
+                const formattedEnd = end.toLocaleDateString('en-US', options);
+                document.getElementById('preview-dates-value').textContent = `${formattedStart} - ${formattedEnd}`;
+            } else {
+                document.getElementById('preview-dates-value').textContent = 'Not specified';
+            }
+        }
+
+        inputs.forEach(input => {
+            input.addEventListener('input', updatePreview);
+        });
+
+        // Form validation
+        form.addEventListener('submit', function(e) {
+            let isValid = true;
+            inputs.forEach(input => {
+                const formGroup = input.closest('.form-group');
+                if (!input.value.trim()) {
+                    formGroup.classList.add('error');
+                    isValid = false;
+                } else {
+                    formGroup.classList.remove('error');
+                }
+            });
+
+            if (!isValid) {
+                e.preventDefault();
+                alert('Please fill in all required fields');
+            }
+        });
+    </script>
 </body>
 </html>
