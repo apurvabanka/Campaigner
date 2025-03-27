@@ -15,7 +15,15 @@ def dashboard(request):
     owner = BusinessOwner.objects.get(user=request.user)
     customers = Customer.objects.filter(owner=owner)
     campaigns = Campaign.objects.filter(owner=owner)
-    return render(request, 'accounts/dashboard.html', {'owner': owner, 'customers': customers, 'campaigns': campaigns})
+    total_revenue = sum(customer.reward_points for customer in customers)
+    total_referrals = sum(customer.referrals_sent for customer in customers)
+    return render(request, 'accounts/dashboard.html', {
+        'owner': owner, 
+        'customers': customers, 
+        'campaigns': campaigns,
+        'total_revenue': total_revenue,
+        'total_referrals': total_referrals
+    })
 
 @login_required
 def add_customer(request):

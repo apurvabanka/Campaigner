@@ -292,6 +292,33 @@
         .form-group input[type="date"]:focus::-moz-calendar-picker-indicator {
             filter: invert(0.6);
         }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+        }
+
+        .input-group input {
+            flex: 1;
+        }
+
+        .input-group .btn {
+            white-space: nowrap;
+        }
+
+        .loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .loading i {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -307,7 +334,13 @@
                 
                 <div class="form-group">
                     <label for="title">Campaign Title</label>
-                    <input type="text" id="title" name="title" required>
+                    <div class="input-group">
+                        <input type="text" id="title" name="title" required>
+                        <button type="button" id="generateDesc" class="btn btn-secondary" style="margin-left: 0.5rem;">
+                            <i class="fas fa-magic"></i>
+                            Generate Description
+                        </button>
+                    </div>
                     <div class="help-text">Give your campaign a clear, memorable name</div>
                     <div class="error-message">Please enter a campaign title</div>
                 </div>
@@ -419,6 +452,52 @@
             if (!isValid) {
                 e.preventDefault();
                 alert('Please fill in all required fields');
+            }
+        });
+
+        // Generate description functionality
+        const generateDescBtn = document.getElementById('generateDesc');
+        const titleInput = document.getElementById('title');
+        const descriptionInput = document.getElementById('description');
+
+        generateDescBtn.addEventListener('click', async function() {
+            const title = titleInput.value.trim();
+            if (!title) {
+                alert('Please enter a campaign title first');
+                return;
+            }
+
+            // Show loading state
+            generateDescBtn.classList.add('loading');
+            generateDescBtn.innerHTML = '<i class="fas fa-spinner"></i> Generating...';
+
+            try {
+                const response = await fetch('http://localhost:11434/api/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        model: "llama3.2",
+                        prompt: `Generate a compelling campaign description for a referral program with the title "${title}". The description should highlight the benefits, rewards, and why customers should participate. Keep it concise and engaging. Add pointers in the description regarding the campaign.`,
+                        stream: false
+                    })
+                });
+
+                const data = await response.json();
+                if (data.response) {
+                    descriptionInput.value = data.response;
+                    updatePreview();
+                } else {
+                    throw new Error('No response from API');
+                }
+            } catch (error) {
+                console.error('Error generating description:', error);
+                alert('Failed to generate description. Please try again.');
+            } finally {
+                // Reset button state
+                generateDescBtn.classList.remove('loading');
+                generateDescBtn.innerHTML = '<i class="fas fa-magic"></i> Generate Description';
             }
         });
     </script>

@@ -4,6 +4,7 @@
     <title>Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -116,6 +117,17 @@
             width: 20px;
             text-align: center;
             flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item:hover i {
+            transform: scale(1.1);
+            color: #667eea;
+        }
+
+        .nav-item.active i {
+            color: #667eea;
+            transform: scale(1.1);
         }
 
         .nav-item span {
@@ -254,7 +266,14 @@
             right: 1rem;
             top: 1rem;
             opacity: 0.1;
-            font-size: 2rem;
+            font-size: 2.5rem;
+            transition: all 0.3s ease;
+            transform: scale(1);
+        }
+
+        .stat-card:hover .stat-icon {
+            opacity: 0.15;
+            transform: scale(1.1);
         }
 
         .section {
@@ -361,6 +380,30 @@
             justify-content: center;
             color: white;
             font-size: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .campaign-icon::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%);
+            transform: translateY(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .campaign-card:hover .campaign-icon {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .campaign-card:hover .campaign-icon::before {
+            transform: translateY(0);
         }
 
         .campaign-content {
@@ -397,6 +440,12 @@
 
         .stat i {
             color: #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .campaign-card:hover .stat i {
+            color: #764ba2;
+            transform: scale(1.1);
         }
 
         .campaign-actions {
@@ -429,6 +478,14 @@
             color: #e53e3e;
         }
 
+        .action-btn i {
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover i {
+            transform: scale(1.1);
+        }
+
         .empty-state {
             grid-column: 1 / -1;
             text-align: center;
@@ -442,6 +499,12 @@
             font-size: 3rem;
             color: #cbd5e0;
             margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .empty-state:hover i {
+            color: #667eea;
+            transform: scale(1.1);
         }
 
         .empty-state h3 {
@@ -476,6 +539,254 @@
 
             .campaigns-grid {
                 grid-template-columns: 1fr;
+            }
+        }
+
+        .logo i {
+            transition: all 0.3s ease;
+        }
+
+        .logo:hover i {
+            transform: scale(1.1);
+        }
+
+        .ai-assistant-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            border: none;
+        }
+
+        .ai-assistant-btn i {
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .ai-assistant-btn:hover {
+            transform: translateY(-5px) scale(1.1);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+        }
+
+        .ai-assistant-btn:hover i {
+            transform: rotate(360deg);
+        }
+
+        .ai-assistant-btn::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%);
+            transform: scale(0);
+            transition: transform 0.3s ease;
+        }
+
+        .ai-assistant-btn:hover::before {
+            transform: scale(1);
+        }
+
+        .ai-assistant-btn::after {
+            content: 'AI Assistant';
+            position: absolute;
+            right: 70px;
+            background: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            color: #2d3748;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            transform: translateX(10px);
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            pointer-events: none;
+        }
+
+        .ai-assistant-btn:hover::after {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        @media (max-width: 768px) {
+            .ai-assistant-btn {
+                bottom: 1rem;
+                right: 1rem;
+                width: 50px;
+                height: 50px;
+            }
+
+            .ai-assistant-btn i {
+                font-size: 1.25rem;
+            }
+
+            .ai-assistant-btn::after {
+                display: none;
+            }
+        }
+
+        .chat-window {
+            position: fixed;
+            bottom: 90px;
+            right: 2rem;
+            width: 400px;
+            height: 600px;
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            display: none;
+            flex-direction: column;
+            z-index: 1000;
+            overflow: hidden;
+        }
+
+        .chat-window.active {
+            display: flex;
+        }
+
+        .chat-header {
+            padding: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chat-header h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .close-chat {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s;
+        }
+
+        .close-chat:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 0.75rem 1rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            position: relative;
+        }
+
+        .message.user {
+            background: #f7fafc;
+            color: #2d3748;
+            align-self: flex-end;
+            border-bottom-right-radius: 0.25rem;
+        }
+
+        .message.assistant {
+            background: #ebf4ff;
+            color: #2d3748;
+            align-self: flex-start;
+            border-bottom-left-radius: 0.25rem;
+        }
+
+        .message.typing {
+            opacity: 0.7;
+        }
+
+        .message.typing::after {
+            content: '...';
+            animation: typing 1s infinite;
+        }
+
+        @keyframes typing {
+            0% { content: '.'; }
+            33% { content: '..'; }
+            66% { content: '...'; }
+        }
+
+        .chat-input {
+            padding: 1rem;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .chat-input input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .send-message {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .send-message:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(102, 126, 234, 0.2);
+        }
+
+        .send-message:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        @media (max-width: 768px) {
+            .chat-window {
+                width: 100%;
+                height: 100%;
+                bottom: 0;
+                right: 0;
+                border-radius: 0;
             }
         }
     </style>
@@ -527,13 +838,13 @@
                     <div class="stat-icon">📢</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-title">Conversion Rate</div>
-                    <div class="stat-value">{{ conversion_rate|default:"0" }}%</div>
+                    <div class="stat-title">Total Revenue</div>
+                    <div class="stat-value">$ {{ total_revenue }}</div>
                     <div class="stat-icon">📈</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-title">Total Referrals</div>
-                    <div class="stat-value">{{ total_referrals|default:"0" }}</div>
+                    <div class="stat-value">{{ total_referrals }}</div>
                     <div class="stat-icon">🔄</div>
                 </div>
             </div>
@@ -560,6 +871,7 @@
                             <th>Email</th>
                             <th>Referrals Sent</th>
                             <th>Referrals Completed</th>
+                            <th>Rewards Earned</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -569,6 +881,7 @@
                             <td>{{ customer.email }}</td>
                             <td>{{ customer.referrals_sent }}</td>
                             <td>{{ customer.referrals_completed }}</td>
+                            <td>$ {{ customer.reward_points }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -619,6 +932,30 @@
                 </div>
                 {% endfor %}
             </div>
+        </div>
+    </div>
+
+    <button class="ai-assistant-btn" title="AI Assistant">
+        <i class="fas fa-robot"></i>
+    </button>
+
+    <div class="chat-window">
+        <div class="chat-header">
+            <h3><i class="fas fa-robot"></i> AI Assistant</h3>
+            <button class="close-chat">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="chat-messages">
+            <div class="message assistant">
+                Hello! I'm your AI assistant. How can I help you today?
+            </div>
+        </div>
+        <div class="chat-input">
+            <input type="text" placeholder="Type your message..." id="messageInput">
+            <button class="send-message" id="sendMessage">
+                <i class="fas fa-paper-plane"></i>
+            </button>
         </div>
     </div>
 
@@ -696,6 +1033,83 @@
                         }
                     }
                 }
+            }
+        });
+
+        // Chat functionality
+        const chatWindow = document.querySelector('.chat-window');
+        const aiAssistantBtn = document.querySelector('.ai-assistant-btn');
+        const closeChatBtn = document.querySelector('.close-chat');
+        const messageInput = document.getElementById('messageInput');
+        const sendMessageBtn = document.getElementById('sendMessage');
+        const chatMessages = document.querySelector('.chat-messages');
+
+        aiAssistantBtn.addEventListener('click', () => {
+            chatWindow.classList.add('active');
+        });
+
+        closeChatBtn.addEventListener('click', () => {
+            chatWindow.classList.remove('active');
+        });
+
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            // Add user message
+            addMessage(message, 'user');
+            messageInput.value = '';
+            sendMessageBtn.disabled = true;
+
+            // Add typing indicator
+            const typingMessage = addMessage('Thinking...', 'assistant', true);
+
+            try {
+                const response = await fetch('http://localhost:11434/api/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        model: "llama3.2",
+                        prompt: message,
+                        stream: false
+                    })
+                });
+
+                const data = await response.json();
+                
+                // Remove typing indicator
+                typingMessage.remove();
+
+                if (data.response) {
+                    addMessage(data.response, 'assistant');
+                } else {
+                    throw new Error('No response from API');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                typingMessage.remove();
+                addMessage('Sorry, I encountered an error. Please try again.', 'assistant');
+            } finally {
+                sendMessageBtn.disabled = false;
+            }
+        }
+
+        function addMessage(text, type, isTyping = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}${isTyping ? ' typing' : ''}`;
+            messageDiv.textContent = text;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            return messageDiv;
+        }
+
+        sendMessageBtn.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
             }
         });
     </script>
