@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+    <a href="{% url 'logout' %}">Logout</a>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Dashboard</h1>
+    <h2>Customers</h2>
+    <ul>
+        <table>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+            </tr>
+            {% for customer in customers %}
+            <tr>
+                <td>{{ customer.name }}</td>
+                <td>{{ customer.email }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </ul>
+    <a href="{% url 'add_customer' %}"><button>Add Customer</button></a>
+    <a href="{% url 'bulk_upload_customers' %}"><button>Upload Customers</button></a>
+<h2>Your Campaigns</h2>
+<a href="{% url 'create_campaign' %}"><button>Create Campaign</button></a>
+<ul>
+    <table>
+        <tr>
+            <th>Campaign Name</th>
+            <th>Campaign Details</th>
+        </tr>
+    {% for campaign in campaigns %}
+        <tr>
+            <td>{{ campaign.title }}</td>
+            <td>{{ campaign.description }}</td>
+    {% endfor %}
+</ul>
+</body>
+</html>
