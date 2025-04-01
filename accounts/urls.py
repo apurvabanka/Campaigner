@@ -7,4 +7,5 @@ urlpatterns = [
     path('bulk_upload_customers/', views.bulk_upload_customers, name='bulk_upload_customers'),
     path('', views.register_or_login, name='register_or_login'),
     path('logout/', views.user_logout, name='logout'),
+    path('generate-ai-response/', views.generate_ai_response, name='generate_ai_response'),
 ]

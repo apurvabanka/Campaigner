@@ -27,7 +27,7 @@ def create_campaign(request):
                 try:
                     send_mail(
                         'New Campaign Referral',
-                        f'Hello {customer.name},\n\nYou have been referred to a new campaign: {campaign.title}.\nYour referral code is: {campaign_customer.referral_code}.\n\n Use this link to refer new individuals and claim your reward - http://127.0.0.1:8000/refer_customer/{campaign_customer.referral_code}\n\nBest regards,\n{business_owner.business_name}',
+                        f'Hello {customer.name},\n\nYou have been referred to a new campaign: {campaign.title}.\nYour referral code is: {campaign_customer.referral_code}.\n\n Use this link to refer new individuals and claim your reward - https://campaigner-oioe.onrender.com/refer_customer/{campaign_customer.referral_code}\n\nBest regards,\n{business_owner.business_name}',
                         business_owner.user.email,
                         [customer.email],
                         fail_silently=False,
@@ -91,7 +91,7 @@ def refer_customer(request, referral_code):
                 try:
                     send_mail(
                         'You have been referred!',
-                        f'Hello {form.cleaned_data["name"]},\n\nYou have been referred to join our campaign: {campaign_customer.campaign.title}.\n\nPlease use the referral code to get onboarded {campaign_customer.referral_code}.\n\n You can use this link to compelte the onboarding process. http://127.0.0.1:8000/onboard/ \n\nBest regards,\n{campaign_customer.customer.owner.business_name}',
+                        f'Hello {form.cleaned_data["name"]},\n\nYou have been referred to join our campaign: {campaign_customer.campaign.title}.\n\nPlease use the referral code to get onboarded {campaign_customer.referral_code}.\n\n You can use this link to compelte the onboarding process. https://campaigner-oioe.onrender.com/onboard/ \n\nBest regards,\n{campaign_customer.customer.owner.business_name}',
                         'apurvabanka1712@gmail.com',
                         [referred_email],
                         fail_silently=False,
@@ -139,7 +139,7 @@ def onboarding(request):
                 try:
                     send_mail(
                         'Welcome to the campaign!',
-                        f'Hello {referred_customer.name},\n\nWelcome to our campaign: {campaign_customer.campaign.title}.\n\n Your referral code is: {new_campaign_customer.referral_code}\n\n Use this link to refer new individuals and claim your reward - http://127.0.0.1:8000/refer_customer/{new_campaign_customer.referral_code} \n\nBest regards,\n{campaign_customer.customer.owner.business_name}',
+                        f'Hello {referred_customer.name},\n\nWelcome to our campaign: {campaign_customer.campaign.title}.\n\n Your referral code is: {new_campaign_customer.referral_code}\n\n Use this link to refer new individuals and claim your reward - https://campaigner-oioe.onrender.com/refer_customer/{new_campaign_customer.referral_code} \n\nBest regards,\n{campaign_customer.customer.owner.business_name}',
                         'apurvabanka1712@gmail.com',
                         [referred_customer.email],
                         fail_silently=False,

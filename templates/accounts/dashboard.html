@@ -5,6 +5,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+    <script>
+        // Remove the API key and endpoint constants since we're using the backend now
+    </script>
+    <script src="https://www.gstatic.com/generative-ai-js/v1/generative-ai.js"></script>
     <style>
         * {
             margin: 0;
@@ -792,6 +796,7 @@
     </style>
 </head>
 <body>
+    {% csrf_token %}
     <div class="sidebar">
         <div class="logo-container">
             <div class="logo">C</div>
@@ -1065,17 +1070,20 @@
             const typingMessage = addMessage('Thinking...', 'assistant', true);
 
             try {
-                const response = await fetch('http://localhost:11434/api/generate', {
+                const response = await fetch('{% url "generate_ai_response" %}', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('input[name=csrfmiddlewaretoken]').value
                     },
                     body: JSON.stringify({
-                        model: "llama3.2",
-                        prompt: message,
-                        stream: false
+                        prompt: message
                     })
                 });
+
+                if (!response.ok) {
+                    throw new Error(`API request failed: ${response.status}`);
+                }
 
                 const data = await response.json();
                 

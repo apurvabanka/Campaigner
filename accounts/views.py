@@ -9,6 +9,11 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate, logout
 from io import TextIOWrapper
 from .forms import BusinessOwnerForm, LoginForm
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+import json
+import requests
+from django.conf import settings
 
 @login_required
 def dashboard(request):
@@ -85,3 +90,39 @@ def register_or_login(request):
 def user_logout(request):
     logout(request)
     return redirect('register_or_login')
+
+@require_http_methods(["POST"])
+def generate_ai_response(request):
+    try:
+        data = json.loads(request.body)
+        prompt = data.get('prompt')
+        
+        if not prompt:
+            return JsonResponse({'error': 'No prompt provided'}, status=400)
+        
+        # Make request to Gemini API
+        response = requests.post(
+            'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
+            headers={
+                'Content-Type': 'application/json',
+                'x-goog-api-key': settings.GEMINI_API_KEY
+            },
+            json={
+                'contents': [{
+                    'parts': [{
+                        'text': prompt
+                    }]
+                }]
+            }
+        )
+        
+        if response.status_code != 200:
+            return JsonResponse({'error': 'API request failed'}, status=response.status_code)
+        
+        response_data = response.json()
+        generated_text = response_data.get('candidates', [{}])[0].get('content', {}).get('parts', [{}])[0].get('text', '')
+        
+        return JsonResponse({'response': generated_text})
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
