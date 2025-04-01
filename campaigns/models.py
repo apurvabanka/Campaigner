@@ -8,6 +8,13 @@ class Campaign(models.Model):
     description = models.TextField()
     start_date = models.DateField()
     end_date = models.DateField()
+    reward_type = models.CharField(max_length=20, choices=[
+        ('cash', 'Cash Reward'),
+        ('discount', 'Discount Amount'),
+        ('points', 'Reward Points'),
+        ('gift', 'Gift Card')
+    ], default='cash')
+    reward_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
 # Customer that are part of a campaign
 class CampaignCustomer(models.Model):

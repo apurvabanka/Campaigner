@@ -510,7 +510,7 @@
 
                 <div class="form-group">
                     <label for="task">Campaign Task</label>
-                    <select id="task" name="task" required>
+                    <select id="task" name="reward_type" required>
                         <option value="">Select a reward type</option>
                         <option value="cash">Cash Reward</option>
                         <option value="discount">Discount Amount</option>
@@ -527,7 +527,7 @@
                         <span class="input-prefix">$</span>
                         <input type="number" 
                                id="amount" 
-                               name="amount" 
+                               name="reward_amount" 
                                min="0" 
                                step="0.01" 
                                placeholder="0.00"
@@ -603,6 +603,19 @@
                 document.getElementById('end_date').value < this.value) {
                 document.getElementById('end_date').value = this.value;
             }
+        });
+
+        // Update the task select change handler
+        taskSelect.addEventListener('change', function() {
+            const selectedType = this.value;
+            if (selectedType) {
+                amountGroup.style.display = 'block';
+                amountInput.required = true;
+            } else {
+                amountGroup.style.display = 'none';
+                amountInput.required = false;
+            }
+            updatePreview();
         });
 
         // Handle "Use This" button clicks

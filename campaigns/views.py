@@ -15,6 +15,11 @@ def create_campaign(request):
             campaign = form.save(commit=False)
             business_owner = BusinessOwner.objects.get(user=request.user)
             campaign.owner = business_owner
+            
+            # Get reward fields from the form
+            campaign.reward_type = form.cleaned_data['reward_type']
+            campaign.reward_amount = form.cleaned_data['reward_amount']
+            
             campaign.save()
         
             customers = Customer.objects.filter(owner=business_owner)
@@ -73,25 +78,28 @@ def refer_customer(request, referral_code):
             referred_email = form.cleaned_data['email']
             try:
                 campaign_customer = CampaignCustomer.objects.get(referral_code=referral_code)
-                # referred_customer = Customer.objects.create(
-                #     email=referred_email,
-                #     name=form.cleaned_data['name'],
-                #     owner=campaign_customer.customer.owner
-                # )
+                campaign = campaign_customer.campaign
+                
                 Referral.objects.create(
                     customer=campaign_customer.customer,
-                    campaign=campaign_customer.campaign,
+                    campaign=campaign,
                     referred_email=referred_email
                 )
-                # Reward the referring customer
+                
+                # Reward the referring customer based on campaign reward type
                 campaign_customer.customer.referrals_sent += 1
+                
+                # Add reward points based on campaign type
+                if campaign.reward_type == 'points':
+                    campaign_customer.customer.reward_points += int(campaign.reward_amount)
+                
                 campaign_customer.customer.save()
                 
                 # Send email to the referred individual
                 try:
                     send_mail(
                         'You have been referred!',
-                        f'Hello {form.cleaned_data["name"]},\n\nYou have been referred to join our campaign: {campaign_customer.campaign.title}.\n\nPlease use the referral code to get onboarded {campaign_customer.referral_code}.\n\n You can use this link to compelte the onboarding process. https://campaigner-oioe.onrender.com/onboard/ \n\nBest regards,\n{campaign_customer.customer.owner.business_name}',
+                        f'Hello {form.cleaned_data["name"]},\n\nYou have been referred to join our campaign: {campaign.title}.\n\nReward: {campaign.reward_amount}{"%" if campaign.reward_type == "discount" else "$" if campaign.reward_type in ["cash", "gift"] else " points"}\n\nPlease use the referral code to get onboarded {campaign_customer.referral_code}.\n\n You can use this link to compelte the onboarding process. https://campaigner-oioe.onrender.com/onboard/ \n\nBest regards,\n{campaign_customer.customer.owner.business_name}',
                         'apurvabanka1712@gmail.com',
                         [referred_email],
                         fail_silently=False,
