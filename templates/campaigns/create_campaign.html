@@ -540,6 +540,57 @@
                 </div>
 
                 <div class="form-group">
+                    <label>Campaign Duration</label>
+                    <button type="button" id="generateDuration" class="btn btn-secondary">
+                        <i class="fas fa-calendar-alt"></i>
+                        Get Duration Suggestions
+                    </button>
+                    <div class="help-text">Choose a suggested duration for your campaign</div>
+                </div>
+
+                <div class="form-group" id="durationSuggestionsGroup" style="display: none;">
+                    <label>Suggested Duration</label>
+                    <div class="task-suggestions">
+                        <div class="task-suggestion" data-days="7">
+                            <div class="suggestion-content">
+                                <i class="fas fa-calendar-week"></i>
+                                <span class="suggestion-text">7 Days</span>
+                            </div>
+                            <button type="button" class="btn btn-secondary btn-sm use-suggestion">
+                                <i class="fas fa-check"></i> Use This
+                            </button>
+                        </div>
+                        <div class="task-suggestion" data-days="10">
+                            <div class="suggestion-content">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span class="suggestion-text">10 Days</span>
+                            </div>
+                            <button type="button" class="btn btn-secondary btn-sm use-suggestion">
+                                <i class="fas fa-check"></i> Use This
+                            </button>
+                        </div>
+                        <div class="task-suggestion" data-days="15">
+                            <div class="suggestion-content">
+                                <i class="fas fa-calendar"></i>
+                                <span class="suggestion-text">15 Days</span>
+                            </div>
+                            <button type="button" class="btn btn-secondary btn-sm use-suggestion">
+                                <i class="fas fa-check"></i> Use This
+                            </button>
+                        </div>
+                        <div class="task-suggestion" data-days="30">
+                            <div class="suggestion-content">
+                                <i class="fas fa-calendar-check"></i>
+                                <span class="suggestion-text">30 Days</span>
+                            </div>
+                            <button type="button" class="btn btn-secondary btn-sm use-suggestion">
+                                <i class="fas fa-check"></i> Use This
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
                     <label for="start_date">Start Date</label>
                     <input type="date" id="start_date" name="start_date" required min="">
                     <div class="help-text">When should the campaign begin?</div>
@@ -591,6 +642,10 @@
         const previewDescription = document.getElementById('preview-description');
         const previewDatesValue = document.getElementById('preview-dates-value');
 
+        // Add new variable for generate duration button
+        const generateDurationBtn = document.getElementById('generateDuration');
+        const durationSuggestionsGroup = document.getElementById('durationSuggestionsGroup');
+
         // Set minimum date to today for both date inputs
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('start_date').min = today;
@@ -603,6 +658,36 @@
                 document.getElementById('end_date').value < this.value) {
                 document.getElementById('end_date').value = this.value;
             }
+        });
+
+        // Add event listener for generate duration button
+        generateDurationBtn.addEventListener('click', function() {
+            durationSuggestionsGroup.style.display = 'block';
+        });
+
+        // Handle duration suggestion clicks
+        document.querySelectorAll('#durationSuggestionsGroup .use-suggestion').forEach(button => {
+            button.addEventListener('click', function() {
+                const suggestion = this.closest('.task-suggestion');
+                const days = parseInt(suggestion.dataset.days);
+                
+                // Set start date to today
+                const startDate = new Date();
+                document.getElementById('start_date').value = startDate.toISOString().split('T')[0];
+                
+                // Calculate end date
+                const endDate = new Date(startDate);
+                endDate.setDate(endDate.getDate() + days);
+                document.getElementById('end_date').value = endDate.toISOString().split('T')[0];
+                
+                // Highlight the selected suggestion
+                document.querySelectorAll('#durationSuggestionsGroup .task-suggestion').forEach(s => {
+                    s.classList.remove('selected');
+                });
+                suggestion.classList.add('selected');
+                
+                updatePreview();
+            });
         });
 
         // Update the task select change handler
