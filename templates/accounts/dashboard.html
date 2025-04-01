@@ -1077,7 +1077,8 @@
                         'X-CSRFToken': document.querySelector('input[name=csrfmiddlewaretoken]').value
                     },
                     body: JSON.stringify({
-                        prompt: message
+                        prompt: message,
+                        type: 'chatbot'
                     })
                 });
 

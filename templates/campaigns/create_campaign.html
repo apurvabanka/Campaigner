@@ -368,6 +368,64 @@
                 opacity: 0;
             }
         }
+
+        .task-suggestions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .task-suggestion {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .suggestion-content {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .suggestion-content i {
+            font-size: 1.25rem;
+            color: #667eea;
+            width: 24px;
+            text-align: center;
+        }
+
+        .suggestion-text {
+            color: #4a5568;
+            font-size: 0.875rem;
+            line-height: 1.4;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        .use-suggestion {
+            align-self: flex-end;
+            background: #edf2f7;
+            color: #4a5568;
+            border: 1px solid #e2e8f0;
+        }
+
+        .use-suggestion:hover {
+            background: #e2e8f0;
+            color: #2d3748;
+        }
+
+        .task-suggestion:hover {
+            border-color: #667eea;
+            box-shadow: 0 2px 4px rgba(102, 126, 234, 0.1);
+        }
     </style>
 </head>
 <body>
@@ -399,6 +457,79 @@
                     <textarea id="description" name="description" required></textarea>
                     <div class="help-text">Describe what makes this campaign special and why customers should participate</div>
                     <div class="error-message">Please enter a campaign description</div>
+                </div>
+
+                <div class="form-group" id="taskSuggestionsGroup" style="display: none;">
+                    <label>Suggested Rewards</label>
+                    <div class="task-suggestions">
+                        <div class="task-suggestion" data-type="cash">
+                            <div class="suggestion-content">
+                                <i class="fas fa-money-bill-wave"></i>
+                                <span class="suggestion-text"></span>
+                            </div>
+                            <button type="button" class="btn btn-secondary btn-sm use-suggestion">
+                                <i class="fas fa-check"></i> Use This
+                            </button>
+                        </div>
+                        <div class="task-suggestion" data-type="discount">
+                            <div class="suggestion-content">
+                                <i class="fas fa-percentage"></i>
+                                <span class="suggestion-text"></span>
+                            </div>
+                            <button type="button" class="btn btn-secondary btn-sm use-suggestion">
+                                <i class="fas fa-check"></i> Use This
+                            </button>
+                        </div>
+                        <div class="task-suggestion" data-type="points">
+                            <div class="suggestion-content">
+                                <i class="fas fa-star"></i>
+                                <span class="suggestion-text"></span>
+                            </div>
+                            <button type="button" class="btn btn-secondary btn-sm use-suggestion">
+                                <i class="fas fa-check"></i> Use This
+                            </button>
+                        </div>
+                        <div class="task-suggestion" data-type="gift">
+                            <div class="suggestion-content">
+                                <i class="fas fa-gift"></i>
+                                <span class="suggestion-text"></span>
+                            </div>
+                            <button type="button" class="btn btn-secondary btn-sm use-suggestion">
+                                <i class="fas fa-check"></i> Use This
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="task">Campaign Task</label>
+                    <select id="task" name="task" required>
+                        <option value="">Select a reward type</option>
+                        <option value="cash">Cash Reward</option>
+                        <option value="discount">Discount Amount</option>
+                        <option value="points">Reward Points</option>
+                        <option value="gift">Gift Card</option>
+                    </select>
+                    <div class="help-text">Select the type of reward for this campaign</div>
+                    <div class="error-message">Please select a reward type</div>
+                </div>
+
+                <div class="form-group" id="amountGroup" style="display: none;">
+                    <label for="amount">Reward Amount</label>
+                    <div class="input-group">
+                        <span class="input-prefix">$</span>
+                        <input type="number" 
+                               id="amount" 
+                               name="amount" 
+                               min="0" 
+                               step="0.01" 
+                               placeholder="0.00"
+                               pattern="[0-9]*\.?[0-9]*"
+                               inputmode="decimal">
+                        <div class="amount-suffix">per referral</div>
+                    </div>
+                    <div class="help-text">Enter the reward amount for each successful referral</div>
+                    <div class="error-message">Please enter a valid amount</div>
                 </div>
 
                 <div class="form-group">
@@ -440,8 +571,19 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
     <script>
-        // Remove the API key and endpoint constants since we're using the backend now
-        
+        // Define all required variables at the beginning
+        const taskSelect = document.getElementById('task');
+        const amountInput = document.getElementById('amount');
+        const amountGroup = document.getElementById('amountGroup');
+        const generateDescBtn = document.getElementById('generateDesc');
+        const titleInput = document.getElementById('title');
+        const descriptionInput = document.getElementById('description');
+        const form = document.getElementById('campaignForm');
+        const inputs = form.querySelectorAll('input, textarea, select');
+        const previewTitle = document.getElementById('preview-title');
+        const previewDescription = document.getElementById('preview-description');
+        const previewDatesValue = document.getElementById('preview-dates-value');
+
         // Set minimum date to today for both date inputs
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('start_date').min = today;
@@ -456,35 +598,116 @@
             }
         });
 
+        // Handle "Use This" button clicks
+        document.querySelectorAll('.use-suggestion').forEach(button => {
+            button.addEventListener('click', function() {
+                const suggestion = this.closest('.task-suggestion');
+                const type = suggestion.dataset.type;
+                const text = suggestion.querySelector('.suggestion-text').textContent;
+                
+                // Update task dropdown
+                taskSelect.value = type;
+                
+                // Extract amount from text
+                const amountMatch = text.match(/\$(\d+\.?\d*)/) || text.match(/(\d+)%/);
+                if (amountMatch) {
+                    amountInput.value = amountMatch[1];
+                    amountGroup.style.display = 'block';
+                    amountInput.required = true;
+                }
+                
+                // Hide suggestions
+                document.getElementById('taskSuggestionsGroup').style.display = 'none';
+                
+                updatePreview();
+            });
+        });
+
+        // Update the generate description functionality
+        generateDescBtn.addEventListener('click', async function() {
+            const title = titleInput.value.trim();
+            if (!title) {
+                alert('Please enter a campaign title first');
+                return;
+            }
+
+            // Show loading state
+            generateDescBtn.classList.add('loading');
+            generateDescBtn.innerHTML = '<i class="fas fa-spinner"></i> Generating...';
+
+            try {
+                const prompt = `Generate a compelling campaign description and task suggestions for a referral program with the title "${title}". 
+                The response should be in JSON format with two fields:
+                1. "description": A compelling description that highlights the benefits, rewards, and why customers should participate. Keep it concise and engaging.
+                2. "task_suggestions": An object with 4 task suggestions in the following format:
+                   {
+                     "cash": "Cash reward of $X for each successful referral",
+                     "discount": "X% discount on next purchase for each successful referral",
+                     "points": "X reward points for each successful referral",
+                     "gift": "Gift card worth $X for each successful referral"
+                   }
+                Make the amounts reasonable and attractive for customers.`;
+                
+                const response = await fetch('{% url "generate_ai_response" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    },
+                    body: JSON.stringify({
+                        prompt: prompt,
+                        type: 'campaign'
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API request failed: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.response) {
+                    try {
+                        const parsedResponse = data.response;
+                        
+                        // Update description
+                        descriptionInput.value = parsedResponse.description;
+                        
+                        // Update task suggestions
+                        const taskSuggestions = parsedResponse.task_suggestions;
+                        const suggestionsGroup = document.getElementById('taskSuggestionsGroup');
+                        suggestionsGroup.style.display = 'block';
+                        
+                        // Update each suggestion
+                        Object.entries(taskSuggestions).forEach(([type, text]) => {
+                            const suggestion = suggestionsGroup.querySelector(`[data-type="${type}"]`);
+                            if (suggestion) {
+                                suggestion.querySelector('.suggestion-text').textContent = text;
+                            }
+                        });
+                        
+                        updatePreview();
+                    } catch (parseError) {
+                        console.error('Error parsing AI response:', parseError);
+                        alert('Failed to parse the response. Please try again.');
+                    }
+                } else {
+                    throw new Error('No response from API');
+                }
+            } catch (error) {
+                console.error('Error generating content:', error);
+                alert('Failed to generate content. Please try again.');
+            } finally {
+                // Reset button state
+                generateDescBtn.classList.remove('loading');
+                generateDescBtn.innerHTML = '<i class="fas fa-magic"></i> Generate Description';
+            }
+        });
+
         // Form validation and preview
-        const form = document.getElementById('campaignForm');
-        const inputs = form.querySelectorAll('input, textarea, select');
-        const previewTitle = document.getElementById('preview-title');
-        const previewDescription = document.getElementById('preview-description');
-        const previewDatesValue = document.getElementById('preview-dates-value');
-
-        function showNotification(message) {
-            const banner = document.createElement('div');
-            banner.className = 'notification-banner';
-            banner.innerHTML = `
-                <i class="fas fa-envelope"></i>
-                ${message}
-            `;
-            document.body.appendChild(banner);
-
-            // Show the banner
-            setTimeout(() => banner.classList.add('show'), 100);
-
-            // Hide and remove after 5 seconds
-            setTimeout(() => {
-                banner.classList.remove('show');
-                setTimeout(() => banner.remove(), 300);
-            }, 5000);
-        }
-
         function updatePreview() {
-            const title = document.getElementById('title').value || 'Campaign Title';
-            const description = document.getElementById('description').value || 'Campaign description will appear here...';
+            const title = titleInput.value || 'Campaign Title';
+            const description = descriptionInput.value || 'Campaign description will appear here...';
             const startDate = document.getElementById('start_date').value;
             const endDate = document.getElementById('end_date').value;
 
@@ -537,57 +760,24 @@
             }
         });
 
-        // Generate description functionality
-        const generateDescBtn = document.getElementById('generateDesc');
-        const titleInput = document.getElementById('title');
-        const descriptionInput = document.getElementById('description');
+        function showNotification(message) {
+            const banner = document.createElement('div');
+            banner.className = 'notification-banner';
+            banner.innerHTML = `
+                <i class="fas fa-envelope"></i>
+                ${message}
+            `;
+            document.body.appendChild(banner);
 
-        generateDescBtn.addEventListener('click', async function() {
-            const title = titleInput.value.trim();
-            if (!title) {
-                alert('Please enter a campaign title first');
-                return;
-            }
+            // Show the banner
+            setTimeout(() => banner.classList.add('show'), 100);
 
-            // Show loading state
-            generateDescBtn.classList.add('loading');
-            generateDescBtn.innerHTML = '<i class="fas fa-spinner"></i> Generating...';
-
-            try {
-                const prompt = `Generate a compelling campaign description for a referral program with the title "${title}". The description should highlight the benefits, rewards, and why customers should participate. Keep it concise and engaging. Add pointers in the description regarding the campaign.`;
-                
-                const response = await fetch('{% url "generate_ai_response" %}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                    },
-                    body: JSON.stringify({
-                        prompt: prompt
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error(`API request failed: ${response.status}`);
-                }
-
-                const data = await response.json();
-                
-                if (data.response) {
-                    descriptionInput.value = data.response;
-                    updatePreview();
-                } else {
-                    throw new Error('No response from API');
-                }
-            } catch (error) {
-                console.error('Error generating description:', error);
-                alert('Failed to generate description. Please try again.');
-            } finally {
-                // Reset button state
-                generateDescBtn.classList.remove('loading');
-                generateDescBtn.innerHTML = '<i class="fas fa-magic"></i> Generate Description';
-            }
-        });
+            // Hide and remove after 5 seconds
+            setTimeout(() => {
+                banner.classList.remove('show');
+                setTimeout(() => banner.remove(), 300);
+            }, 5000);
+        }
     </script>
 </body>
 </html>
