@@ -433,6 +433,49 @@
             border-color: #667eea;
             box-shadow: 0 2px 4px rgba(102, 126, 234, 0.1);
         }
+
+        .duration-suggestions {
+            display: flex;
+            flex-direction: row;
+            gap: 1rem;
+            margin-top: 0.5rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+        }
+
+        .duration-suggestion {
+            flex: 0 0 auto;
+            min-width: 150px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            transition: all 0.2s ease;
+        }
+
+        .duration-suggestion.selected {
+            background: #edf2f7;
+            border-color: #667eea;
+            box-shadow: 0 2px 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .duration-suggestion:hover {
+            border-color: #667eea;
+            box-shadow: 0 2px 4px rgba(102, 126, 234, 0.1);
+        }
+
+        @media (max-width: 640px) {
+            .duration-suggestions {
+                flex-wrap: wrap;
+            }
+            
+            .duration-suggestion {
+                min-width: calc(50% - 0.5rem);
+            }
+        }
     </style>
 </head>
 <body>
@@ -509,7 +552,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="task">Campaign Task</label>
+                    <label for="task">Campaign Reward</label>
                     <select id="task" name="reward_type" required>
                         <option value="">Select a reward type</option>
                         <option value="cash">Cash Reward</option>
@@ -540,6 +583,59 @@
                 </div>
 
                 <div class="form-group">
+                    <label>Task Suggestions</label>
+                    <div class="task-suggestions">
+                        <div class="task-suggestion" data-type="quiz">
+                            <div class="suggestion-content">
+                                <i class="fas fa-question-circle"></i>
+                                <span class="suggestion-text">Complete a 5-question quiz about our products</span>
+                            </div>
+                            <button type="button" class="btn btn-secondary btn-sm use-suggestion">
+                                <i class="fas fa-check"></i> Use This
+                            </button>
+                        </div>
+                        <div class="task-suggestion" data-type="purchase">
+                            <div class="suggestion-content">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span class="suggestion-text">Make a minimum purchase of $50</span>
+                            </div>
+                            <button type="button" class="btn btn-secondary btn-sm use-suggestion">
+                                <i class="fas fa-check"></i> Use This
+                            </button>
+                        </div>
+                        <div class="task-suggestion" data-type="event">
+                            <div class="suggestion-content">
+                                <i class="fas fa-calendar-check"></i>
+                                <span class="suggestion-text">Attend our monthly webinar</span>
+                            </div>
+                            <button type="button" class="btn btn-secondary btn-sm use-suggestion">
+                                <i class="fas fa-check"></i> Use This
+                            </button>
+                        </div>
+                    </div>
+                    <div class="help-text">Choose a suggested task or create your own</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="task_type">Task Type</label>
+                    <select id="task_type" name="task_type" required>
+                        <option value="">Select a task type</option>
+                        <option value="quiz">Quiz or Trivia</option>
+                        <option value="purchase">Make a Purchase</option>
+                        <option value="event">Attend an Event</option>
+                    </select>
+                    <div class="help-text">Select what customers need to do to complete the referral</div>
+                    <div class="error-message">Please select a task type</div>
+                </div>
+
+                <div class="form-group" id="taskDescriptionGroup" style="display: none;">
+                    <label for="task_description">Task Description</label>
+                    <textarea id="task_description" name="task_description" placeholder="Describe the task in detail..."></textarea>
+                    <div class="help-text">Provide clear instructions for customers to complete the task</div>
+                    <div class="error-message">Please enter a task description</div>
+                </div>
+
+                <div class="form-group">
                     <label>Campaign Duration</label>
                     <button type="button" id="generateDuration" class="btn btn-secondary">
                         <i class="fas fa-calendar-alt"></i>
@@ -550,8 +646,8 @@
 
                 <div class="form-group" id="durationSuggestionsGroup" style="display: none;">
                     <label>Suggested Duration</label>
-                    <div class="task-suggestions">
-                        <div class="task-suggestion" data-days="7">
+                    <div class="duration-suggestions">
+                        <div class="duration-suggestion" data-days="7">
                             <div class="suggestion-content">
                                 <i class="fas fa-calendar-week"></i>
                                 <span class="suggestion-text">7 Days</span>
@@ -560,7 +656,7 @@
                                 <i class="fas fa-check"></i> Use This
                             </button>
                         </div>
-                        <div class="task-suggestion" data-days="10">
+                        <div class="duration-suggestion" data-days="10">
                             <div class="suggestion-content">
                                 <i class="fas fa-calendar-alt"></i>
                                 <span class="suggestion-text">10 Days</span>
@@ -569,7 +665,7 @@
                                 <i class="fas fa-check"></i> Use This
                             </button>
                         </div>
-                        <div class="task-suggestion" data-days="15">
+                        <div class="duration-suggestion" data-days="15">
                             <div class="suggestion-content">
                                 <i class="fas fa-calendar"></i>
                                 <span class="suggestion-text">15 Days</span>
@@ -578,7 +674,7 @@
                                 <i class="fas fa-check"></i> Use This
                             </button>
                         </div>
-                        <div class="task-suggestion" data-days="30">
+                        <div class="duration-suggestion" data-days="30">
                             <div class="suggestion-content">
                                 <i class="fas fa-calendar-check"></i>
                                 <span class="suggestion-text">30 Days</span>
@@ -646,6 +742,11 @@
         const generateDurationBtn = document.getElementById('generateDuration');
         const durationSuggestionsGroup = document.getElementById('durationSuggestionsGroup');
 
+        // Add new variables for task type handling
+        const taskTypeSelect = document.getElementById('task_type');
+        const taskDescriptionGroup = document.getElementById('taskDescriptionGroup');
+        const taskDescriptionInput = document.getElementById('task_description');
+
         // Set minimum date to today for both date inputs
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('start_date').min = today;
@@ -667,8 +768,11 @@
 
         // Handle duration suggestion clicks
         document.querySelectorAll('#durationSuggestionsGroup .use-suggestion').forEach(button => {
-            button.addEventListener('click', function() {
-                const suggestion = this.closest('.task-suggestion');
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const suggestion = this.closest('.duration-suggestion');
                 const days = parseInt(suggestion.dataset.days);
                 
                 // Set start date to today
@@ -681,7 +785,7 @@
                 document.getElementById('end_date').value = endDate.toISOString().split('T')[0];
                 
                 // Highlight the selected suggestion
-                document.querySelectorAll('#durationSuggestionsGroup .task-suggestion').forEach(s => {
+                document.querySelectorAll('#durationSuggestionsGroup .duration-suggestion').forEach(s => {
                     s.classList.remove('selected');
                 });
                 suggestion.classList.add('selected');
@@ -690,27 +794,17 @@
             });
         });
 
-        // Update the task select change handler
-        taskSelect.addEventListener('change', function() {
-            const selectedType = this.value;
-            if (selectedType) {
-                amountGroup.style.display = 'block';
-                amountInput.required = true;
-            } else {
-                amountGroup.style.display = 'none';
-                amountInput.required = false;
-            }
-            updatePreview();
-        });
-
-        // Handle "Use This" button clicks
-        document.querySelectorAll('.use-suggestion').forEach(button => {
-            button.addEventListener('click', function() {
+        // Handle reward suggestion clicks
+        document.querySelectorAll('#taskSuggestionsGroup .use-suggestion').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
                 const suggestion = this.closest('.task-suggestion');
                 const type = suggestion.dataset.type;
                 const text = suggestion.querySelector('.suggestion-text').textContent;
                 
-                // Update task dropdown
+                // Update reward type dropdown
                 taskSelect.value = type;
                 
                 // Extract amount from text
@@ -722,13 +816,64 @@
                 }
                 
                 // Highlight the selected suggestion
-                document.querySelectorAll('.task-suggestion').forEach(s => {
+                document.querySelectorAll('#taskSuggestionsGroup .task-suggestion').forEach(s => {
                     s.classList.remove('selected');
                 });
                 suggestion.classList.add('selected');
                 
                 updatePreview();
             });
+        });
+
+        // Handle task suggestion clicks
+        document.querySelectorAll('.task-suggestions .use-suggestion').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const suggestion = this.closest('.task-suggestion');
+                const type = suggestion.dataset.type;
+                const text = suggestion.querySelector('.suggestion-text').textContent;
+                
+                // Update task type dropdown
+                taskTypeSelect.value = type;
+                
+                // Update task description
+                taskDescriptionInput.value = text;
+                taskDescriptionGroup.style.display = 'block';
+                
+                // Highlight the selected suggestion
+                document.querySelectorAll('.task-suggestions .task-suggestion').forEach(s => {
+                    s.classList.remove('selected');
+                });
+                suggestion.classList.add('selected');
+                
+                updatePreview();
+            });
+        });
+
+        // Handle task type selection
+        taskTypeSelect.addEventListener('change', function() {
+            const selectedType = this.value;
+            if (selectedType) {
+                taskDescriptionGroup.style.display = 'block';
+            } else {
+                taskDescriptionGroup.style.display = 'none';
+            }
+            updatePreview();
+        });
+
+        // Handle reward type selection
+        taskSelect.addEventListener('change', function() {
+            const selectedType = this.value;
+            if (selectedType) {
+                amountGroup.style.display = 'block';
+                amountInput.required = true;
+            } else {
+                amountGroup.style.display = 'none';
+                amountInput.required = false;
+            }
+            updatePreview();
         });
 
         // Update the generate description functionality
@@ -812,12 +957,16 @@
             }
         });
 
-        // Form validation and preview
+        // Update the preview function to include reward information
         function updatePreview() {
             const title = titleInput.value || 'Campaign Title';
             const description = descriptionInput.value || 'Campaign description will appear here...';
             const startDate = document.getElementById('start_date').value;
             const endDate = document.getElementById('end_date').value;
+            const taskType = taskTypeSelect.value;
+            const taskDescription = taskDescriptionInput.value;
+            const rewardType = taskSelect.value;
+            const rewardAmount = amountInput.value;
 
             previewTitle.textContent = title;
             previewDescription.textContent = description;
@@ -831,6 +980,30 @@
                 document.getElementById('preview-dates-value').textContent = `${formattedStart} - ${formattedEnd}`;
             } else {
                 document.getElementById('preview-dates-value').textContent = 'Not specified';
+            }
+
+            // Update reward preview if available
+            if (rewardType && rewardAmount) {
+                const rewardPreview = document.createElement('p');
+                rewardPreview.className = 'preview-reward';
+                rewardPreview.innerHTML = `<strong>Reward:</strong> ${rewardType.charAt(0).toUpperCase() + rewardType.slice(1)} reward of $${rewardAmount}`;
+                const existingRewardPreview = document.querySelector('.preview-reward');
+                if (existingRewardPreview) {
+                    existingRewardPreview.remove();
+                }
+                document.querySelector('.preview-card').appendChild(rewardPreview);
+            }
+
+            // Update task preview if available
+            if (taskType && taskDescription) {
+                const taskPreview = document.createElement('p');
+                taskPreview.className = 'preview-task';
+                taskPreview.innerHTML = `<strong>Task:</strong> ${taskDescription}`;
+                const existingTaskPreview = document.querySelector('.preview-task');
+                if (existingTaskPreview) {
+                    existingTaskPreview.remove();
+                }
+                document.querySelector('.preview-card').appendChild(taskPreview);
             }
         }
 
