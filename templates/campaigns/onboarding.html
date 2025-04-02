@@ -215,6 +215,63 @@
                 margin: 0 auto;
             }
         }
+
+        .trivia-section {
+            margin-top: 3rem;
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .trivia-intro {
+            color: #718096;
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .trivia-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .trivia-question {
+            background: #f8fafc;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .trivia-question h3 {
+            color: #2d3748;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+
+        .answer-input {
+            margin-top: 1rem;
+        }
+
+        .answer-textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.375rem;
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        @media (max-width: 640px) {
+            .trivia-section {
+                padding: 1.5rem;
+            }
+
+            .trivia-question {
+                padding: 1rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -237,37 +294,79 @@
                 {% csrf_token %}
                 
                 <div class="form-group">
-                    <label for="name">Full Name</label>
+                    <label for="name">Your Full Name</label>
                     <input type="text" id="name" name="name" required>
                     <div class="help-text">Enter your full name as you want it to appear</div>
                     <div class="error-message">Please enter your name</div>
                 </div>
 
                 <div class="form-group">
-                    <label for="email">Email Address</label>
+                    <label for="email">Your Email Address</label>
                     <input type="email" id="email" name="email" required>
                     <div class="help-text">We'll use this email for important updates and notifications</div>
                     <div class="error-message">Please enter a valid email address</div>
                 </div>
 
                 <div class="form-group">
-                    <label for="referral_code">Referral Code</label>
+                    <label for="referral_code">*Referral Code</label>
                     <input type="text" id="referral_code" name="referral_code" placeholder="Enter your referral code">
-                    <div class="help-text">Enter your referral code if you have one (optional)</div>
+                    <div class="help-text">Enter your referral code that was shared with you.</div>
                     <div class="error-message">Please enter a valid referral code</div>
                 </div>
-
-                <div class="button-group">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-check"></i>
-                        Complete Setup
-                    </button>
-                    <a href="{% url 'dashboard' %}" class="btn btn-secondary">
-                        <i class="fas fa-times"></i>
-                        Skip for Now
-                    </a>
-                </div>
             </form>
+        </div>
+
+        <div class="trivia-section">
+            <h2>Quick Quiz</h2>
+            <p class="trivia-intro">Answer these questions to complete your account setup.</p>
+            
+            <div class="trivia-container">
+                <div class="trivia-question">
+                    <h3>1. What is the most effective way to increase customer engagement in a referral campaign?</h3>
+                    <div class="answer-input">
+                        <textarea class="answer-textarea" placeholder="Enter your answer here..."></textarea>
+                    </div>
+                </div>
+
+                <div class="trivia-question">
+                    <h3>2. What percentage of customers are more likely to make a purchase when referred by a friend?</h3>
+                    <div class="answer-input">
+                        <textarea class="answer-textarea" placeholder="Enter your answer here..."></textarea>
+                    </div>
+                </div>
+
+                <div class="trivia-question">
+                    <h3>3. What is the average conversion rate for referral campaigns compared to other marketing channels?</h3>
+                    <div class="answer-input">
+                        <textarea class="answer-textarea" placeholder="Enter your answer here..."></textarea>
+                    </div>
+                </div>
+
+                <div class="trivia-question">
+                    <h3>4. How long should a typical referral campaign run to achieve optimal results?</h3>
+                    <div class="answer-input">
+                        <textarea class="answer-textarea" placeholder="Enter your answer here..."></textarea>
+                    </div>
+                </div>
+
+                <div class="trivia-question">
+                    <h3>5. What is the most important factor in determining the success of a referral campaign?</h3>
+                    <div class="answer-input">
+                        <textarea class="answer-textarea" placeholder="Enter your answer here..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-group" style="margin-top: 2rem;">
+                <button type="submit" class="btn btn-primary" form="onboardingForm">
+                    <i class="fas fa-check"></i>
+                    Complete Setup
+                </button>
+                <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i>
+                    Skip for Now
+                </a>
+            </div>
         </div>
     </div>
 
