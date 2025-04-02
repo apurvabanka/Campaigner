@@ -1059,6 +1059,23 @@
                 setTimeout(() => banner.remove(), 300);
             }, 5000);
         }
+
+        // Check for stored campaign data
+        document.addEventListener('DOMContentLoaded', function() {
+            const storedData = sessionStorage.getItem('aiCampaignData');
+            if (storedData) {
+                const campaignData = JSON.parse(storedData);
+                
+                // Populate form fields
+                document.getElementById('title').value = campaignData.campaignTitle || '';
+                document.getElementById('description').value = campaignData.description || '';
+                document.getElementById('task').value = campaignData.rewardType.toLowerCase().replace(' ', '_') || '';
+                document.getElementById('duration').value = campaignData.duration || '';
+                
+                // Clear the stored data after populating
+                sessionStorage.removeItem('aiCampaignData');
+            }
+        });
     </script>
 </body>
 </html>

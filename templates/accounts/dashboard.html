@@ -793,6 +793,155 @@
                 border-radius: 0;
             }
         }
+
+        .btn-ai {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-ai:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(102, 126, 234, 0.2);
+        }
+
+        .ai-campaign-chat-window {
+            position: fixed;
+            bottom: 90px;
+            right: 2rem;
+            width: 600px;
+            height: 700px;
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            display: none;
+            flex-direction: column;
+            z-index: 1000;
+            overflow: hidden;
+        }
+
+        .ai-campaign-chat-window.active {
+            display: flex;
+        }
+
+        .ai-campaign-chat-window .chat-header {
+            padding: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .ai-campaign-chat-window .chat-messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .ai-campaign-chat-window .message {
+            max-width: 80%;
+            padding: 0.75rem 1rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            position: relative;
+        }
+
+        .ai-campaign-chat-window .message.user {
+            background: #f7fafc;
+            color: #2d3748;
+            align-self: flex-end;
+            border-bottom-right-radius: 0.25rem;
+        }
+
+        .ai-campaign-chat-window .message.assistant {
+            background: #ebf4ff;
+            color: #2d3748;
+            align-self: flex-start;
+            border-bottom-left-radius: 0.25rem;
+        }
+
+        .ai-campaign-chat-window .chat-input {
+            padding: 1rem;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .ai-campaign-chat-window .chat-input input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .ai-campaign-chat-window .chat-input input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .ai-campaign-chat-window .send-message {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ai-campaign-chat-window .send-message:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(102, 126, 234, 0.2);
+        }
+
+        .ai-campaign-chat-window .send-message:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .create-campaign-btn {
+            display: none;
+            margin-top: 1rem;
+            width: 100%;
+            padding: 0.75rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .create-campaign-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(102, 126, 234, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .ai-campaign-chat-window {
+                width: 100%;
+                height: 100%;
+                bottom: 0;
+                right: 0;
+                border-radius: 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -814,6 +963,10 @@
             <a href="#" class="nav-item" data-section="campaigns">
                 <i class="fas fa-bullhorn"></i>
                 <span>Campaigns</span>
+            </a>
+            <a href="#" class="nav-item" id="aiCampaignNav">
+                <i class="fas fa-robot"></i>
+                <span>Create AI Campaign</span>
             </a>
         </nav>
         <a href="{% url 'logout' %}" class="logout-btn">
@@ -898,6 +1051,10 @@
             <h2>Your Campaigns</h2>
             <div class="action-buttons">
                 <a href="{% url 'create_campaign' %}" class="btn">Create Campaign</a>
+                <button class="btn btn-ai" id="createAICampaign">
+                    <i class="fas fa-robot"></i>
+                    Create Campaign Using AI
+                </button>
             </div>
             <div class="campaigns-grid">
                 {% for campaign in campaigns %}
@@ -964,7 +1121,48 @@
         </div>
     </div>
 
+    <div class="ai-campaign-chat-window">
+        <div class="chat-header">
+            <h3><i class="fas fa-robot"></i> AI Campaign Assistant</h3>
+            <button class="close-chat">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="chat-messages">
+            <div class="message assistant">
+                Hello! I'll help you create a campaign using AI. Let's start with some basic information:
+                <br><br>
+                What type of business do you have? (e.g., e-commerce, service-based, subscription-based)
+            </div>
+        </div>
+        <div class="chat-input">
+            <input type="text" placeholder="Type your message..." id="aiCampaignInput">
+            <button class="send-message" id="sendAICampaignMessage">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
     <script>
+        // Initialize all variables at the top
+        const aiCampaignChat = document.querySelector('.ai-campaign-chat-window');
+        const createAICampaignBtn = document.getElementById('createAICampaign');
+        const closeAICampaignChatBtn = aiCampaignChat.querySelector('.close-chat');
+        const aiCampaignInput = document.getElementById('aiCampaignInput');
+        const sendAICampaignMessageBtn = document.getElementById('sendAICampaignMessage');
+        const aiCampaignMessages = aiCampaignChat.querySelector('.chat-messages');
+        let campaignData = {
+            businessType: '',
+            campaignTitle: '',
+            description: '',
+            rewardType: '',
+            duration: '',
+            targetAudience: '',
+            goals: '',
+            budget: ''
+        };
+        let currentStep = 'businessType';
+
         // Sidebar toggle functionality
         document.querySelector('.toggle-sidebar').addEventListener('click', function() {
             document.querySelector('.sidebar').classList.toggle('collapsed');
@@ -975,6 +1173,33 @@
         document.querySelectorAll('.nav-item').forEach(item => {
             item.addEventListener('click', function(e) {
                 e.preventDefault();
+                
+                // Special handling for AI Campaign nav item
+                if (this.id === 'aiCampaignNav') {
+                    // Remove active class from all nav items
+                    document.querySelectorAll('.nav-item').forEach(nav => {
+                        nav.classList.remove('active');
+                    });
+                    
+                    // Add active class to AI Campaign nav item
+                    this.classList.add('active');
+                    
+                    // Hide all sections
+                    document.querySelectorAll('.section').forEach(section => {
+                        section.style.display = 'none';
+                    });
+                    
+                    // Show campaigns section
+                    document.getElementById('campaigns-section').style.display = 'block';
+                    
+                    // Open AI Campaign chat window
+                    aiCampaignChat.classList.add('active');
+                    
+                    // Update page title
+                    document.querySelector('h1').textContent = 'Create AI Campaign';
+                    
+                    return;
+                }
                 
                 // Remove active class from all nav items
                 document.querySelectorAll('.nav-item').forEach(nav => {
@@ -996,6 +1221,22 @@
                 // Update page title
                 document.querySelector('h1').textContent = this.querySelector('span').textContent;
             });
+        });
+
+        // Also clear campaign data when clicking the close button
+        closeAICampaignChatBtn.addEventListener('click', () => {
+            aiCampaignChat.classList.remove('active');
+            campaignData = {
+                businessType: '',
+                campaignTitle: '',
+                description: '',
+                rewardType: '',
+                duration: '',
+                targetAudience: '',
+                goals: '',
+                budget: ''
+            };
+            currentStep = 'businessType';
         });
 
         // Chart initialization
@@ -1082,6 +1323,8 @@
                     })
                 });
 
+                console.log(response);
+
                 if (!response.ok) {
                     throw new Error(`API request failed: ${response.status}`);
                 }
@@ -1097,9 +1340,10 @@
                     throw new Error('No response from API');
                 }
             } catch (error) {
+                console.log("error here");
                 console.error('Error:', error);
                 typingMessage.remove();
-                addMessage('Sorry, I encountered an error. Please try again.', 'assistant');
+                // addMessage('Sorry, I encountered an error. Please try again.', 'assistant');
             } finally {
                 sendMessageBtn.disabled = false;
             }
@@ -1119,6 +1363,179 @@
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 sendMessage();
+            }
+        });
+
+        createAICampaignBtn.addEventListener('click', () => {
+            // Show campaigns section
+            document.getElementById('campaigns-section').style.display = 'block';
+            // Open AI Campaign chat window
+            aiCampaignChat.classList.add('active');
+        });
+
+        async function sendAICampaignMessage() {
+            const message = aiCampaignInput.value.trim();
+            if (!message) return;
+
+            // Add user message
+            addAICampaignMessage(message, 'user');
+            aiCampaignInput.value = '';
+            sendAICampaignMessageBtn.disabled = true;
+
+            // Add typing indicator
+            const typingMessage = addAICampaignMessage('Thinking...', 'assistant', true);
+
+            try {
+                let prompt = '';
+                switch (currentStep) {
+                    case 'businessType':
+                        campaignData.businessType = message;
+                        prompt = `Based on your business type: "${message}", suggest 3-5 short and catchy campaign names with brief descriptions (max 10 words each). Format the response as JSON:
+                        {
+                            "suggestions": [
+                                {
+                                    "name": "short campaign name",
+                                    "description": "brief 1-line description"
+                                }
+                            ]
+                        }`;
+                        break;
+                    case 'campaignTitle':
+                        // Store the selected campaign name
+                        const selectedName = message.split('.')[1]?.trim() || message;
+                        campaignData.campaignTitle = selectedName;
+                        prompt = `Based on the selected campaign title: "${selectedName}", suggest a reward type from these options:
+                        - Percentage Discount
+                        - Fixed Amount Discount
+                        - Free Shipping
+                        - Free Product
+                        - Points
+                        
+                        Format the response as JSON:
+                        {
+                            "suggestions": [
+                                {
+                                    "type": "reward type",
+                                    "description": "brief 1-line explanation"
+                                }
+                            ]
+                        }`;
+                        break;
+                    case 'rewardType':
+                        // Store the selected reward type
+                        const selectedReward = message.split('.')[1]?.trim() || message;
+                        campaignData.rewardType = selectedReward;
+                        prompt = `Based on the selected reward type: "${selectedReward}", suggest a campaign duration. Consider:
+                        - Short-term campaigns (1-7 days)
+                        - Medium-term campaigns (8-30 days)
+                        - Long-term campaigns (31+ days)
+                        
+                        Format the response as JSON:
+                        {
+                            "suggestions": [
+                                {
+                                    "duration": "number of days",
+                                    "description": "brief 1-line explanation"
+                                }
+                            ]
+                        }`;
+                        break;
+                    case 'duration':
+                        // Store the selected duration
+                        const selectedDuration = message.split('.')[1]?.trim() || message;
+                        campaignData.duration = selectedDuration;
+                        break;
+                }
+
+                if (currentStep !== 'duration') {
+                    const response = await fetch('{% url "ai_campaign_assistant" %}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': document.querySelector('input[name=csrfmiddlewaretoken]').value
+                        },
+                        body: JSON.stringify({
+                            prompt: prompt,
+                            currentStep: currentStep
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`API request failed: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    
+                    // Remove typing indicator
+                    typingMessage.remove();
+
+                    if (data.response) {
+                        // The response is already formatted by the backend
+                        addAICampaignMessage(data.response, 'assistant');
+
+                        // Update current step based on the previous step
+                        if (currentStep === 'businessType') {
+                            currentStep = 'campaignTitle';
+                        } else if (currentStep === 'campaignTitle') {
+                            currentStep = 'rewardType';
+                        } else if (currentStep === 'rewardType') {
+                            currentStep = 'duration';
+                            // Show create campaign button
+                            const createCampaignBtn = document.createElement('button');
+                            createCampaignBtn.className = 'create-campaign-btn';
+                            createCampaignBtn.style.display = 'block';
+                            createCampaignBtn.textContent = 'Create Campaign';
+                            createCampaignBtn.onclick = function() {
+                                // Store campaign data in sessionStorage
+                                sessionStorage.setItem('aiCampaignData', JSON.stringify(campaignData));
+                                // Redirect to create campaign page
+                                window.location.href = '{% url "create_campaign" %}';
+                            };
+                            aiCampaignMessages.appendChild(createCampaignBtn);
+                        }
+                    } else {
+                        throw new Error('No response from API');
+                    }
+                } else {
+                    // Remove typing indicator
+                    typingMessage.remove();
+                    // Show create campaign button
+                    const createCampaignBtn = document.createElement('button');
+                    createCampaignBtn.className = 'create-campaign-btn';
+                    createCampaignBtn.style.display = 'block';
+                    createCampaignBtn.textContent = 'Create Campaign';
+                    createCampaignBtn.onclick = function() {
+                        // Store campaign data in sessionStorage
+                        sessionStorage.setItem('aiCampaignData', JSON.stringify(campaignData));
+                        // Redirect to create campaign page
+                        window.location.href = '{% url "create_campaign" %}';
+                    };
+                    aiCampaignMessages.appendChild(createCampaignBtn);
+                }
+            } catch (error) {
+                console.log("error here");
+                console.error('Error:', error);
+                typingMessage.remove();
+                addAICampaignMessage('Sorry, I encountered an error. Please try again.', 'assistant');
+            } finally {
+                sendAICampaignMessageBtn.disabled = false;
+            }
+        }
+
+        function addAICampaignMessage(text, type, isTyping = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}${isTyping ? ' typing' : ''}`;
+            messageDiv.textContent = text;
+            aiCampaignMessages.appendChild(messageDiv);
+            aiCampaignMessages.scrollTop = aiCampaignMessages.scrollHeight;
+            return messageDiv;
+        }
+
+        sendAICampaignMessageBtn.addEventListener('click', sendAICampaignMessage);
+        aiCampaignInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendAICampaignMessage();
             }
         });
     </script>

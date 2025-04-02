@@ -209,3 +209,97 @@ def generate_ai_response(request):
             
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+def ai_campaign_assistant(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        prompt = data.get('prompt', '')
+        current_step = data.get('currentStep', '')
+
+        # Process the prompt based on the current step
+        response = generate_ai_campaign_response(prompt, current_step)
+        return JsonResponse({'response': response})
+    return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+def generate_ai_campaign_response(prompt, current_step):
+    # Different logics for different steps
+    try:
+        # Make request to Gemini API
+        response = requests.post(
+            'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
+            headers={
+                'Content-Type': 'application/json',
+                'x-goog-api-key': settings.GEMINI_API_KEY
+            },
+            json={
+                'contents': [{
+                    'parts': [{
+                        'text': prompt
+                    }]
+                }]
+            }
+        )
+        
+        if response.status_code != 200:
+            return f"Error: API request failed with status {response.status_code}"
+        
+        response_data = response.json()
+        generated_text = response_data.get('candidates', [{}])[0].get('content', {}).get('parts', [{}])[0].get('text', '')
+        
+        # Clean the response by removing markdown code block formatting
+        if isinstance(generated_text, str):
+            # Remove ```json at the start if present
+            if generated_text.startswith('```json'):
+                generated_text = generated_text[7:]
+            # Remove any ``` at the end
+            generated_text = re.sub(r'```$', '', generated_text)
+            generated_text = generated_text.strip()
+        
+        # Log the cleaned response for debugging
+        print(f"Cleaned response: {generated_text}")
+        
+        # Try to parse the response as JSON
+        try:
+            parsed_response = json.loads(generated_text)
+            print(f"Parsed response: {parsed_response}")
+            
+            if isinstance(parsed_response, dict) and 'suggestions' in parsed_response:
+                suggestions = parsed_response['suggestions']
+                
+                if current_step == 'businessType':
+                    response_text = "Based on your business type, here are some campaign suggestions:\n\n"
+                    for i, suggestion in enumerate(suggestions, 1):
+                        if isinstance(suggestion, dict) and 'name' in suggestion and 'description' in suggestion:
+                            response_text += f"{i}. {suggestion['name']}\n"
+                            response_text += f"   {suggestion['description']}\n\n"
+                    response_text += "Please select one of these campaign names or suggest your own."
+                
+                elif current_step == 'campaignTitle':
+                    response_text = "For your campaign, here are some reward type suggestions:\n\n"
+                    for i, suggestion in enumerate(suggestions, 1):
+                        if isinstance(suggestion, dict) and 'type' in suggestion and 'description' in suggestion:
+                            response_text += f"{i}. {suggestion['type']}\n"
+                            response_text += f"   {suggestion['description']}\n\n"
+                    response_text += "Please select one of these reward types or suggest your own."
+                
+                elif current_step == 'rewardType':
+                    response_text = "For your reward type, here are some duration suggestions:\n\n"
+                    for i, suggestion in enumerate(suggestions, 1):
+                        if isinstance(suggestion, dict) and 'duration' in suggestion and 'description' in suggestion:
+                            response_text += f"{i}. {suggestion['duration']} days\n"
+                            response_text += f"   {suggestion['description']}\n\n"
+                    response_text += "Please select one of these durations or suggest your own."
+                
+                return response_text
+            else:
+                print(f"Invalid response structure: {parsed_response}")
+                return "I apologize, but I couldn't generate appropriate suggestions. Please try again with a different input."
+        except json.JSONDecodeError as e:
+            print(f"JSON decode error: {str(e)}")
+            print(f"Failed to parse text: {generated_text}")
+            # return "I apologize, but I couldn't process the response properly. Please try again."
+        
+    except Exception as e:
+        # Log the error for debugging
+        print(f"Error in generate_ai_campaign_response: {str(e)}")
+        return "I apologize, but I encountered an error. Please try again."
