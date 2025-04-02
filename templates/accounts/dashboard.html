@@ -1480,18 +1480,6 @@
                             currentStep = 'rewardType';
                         } else if (currentStep === 'rewardType') {
                             currentStep = 'duration';
-                            // Show create campaign button
-                            const createCampaignBtn = document.createElement('button');
-                            createCampaignBtn.className = 'create-campaign-btn';
-                            createCampaignBtn.style.display = 'block';
-                            createCampaignBtn.textContent = 'Create Campaign';
-                            createCampaignBtn.onclick = function() {
-                                // Store campaign data in sessionStorage
-                                sessionStorage.setItem('aiCampaignData', JSON.stringify(campaignData));
-                                // Redirect to create campaign page
-                                window.location.href = '{% url "create_campaign" %}';
-                            };
-                            aiCampaignMessages.appendChild(createCampaignBtn);
                         }
                     } else {
                         throw new Error('No response from API');
