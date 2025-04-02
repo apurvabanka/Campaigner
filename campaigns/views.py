@@ -33,7 +33,7 @@ def create_campaign(request):
                     send_mail(
                         'New Campaign Referral',
                         f'Hello {customer.name},\n\nYou have been referred to a new campaign: {campaign.title}.\nYour referral code is: {campaign_customer.referral_code}.\n\n Use this link to refer new individuals and claim your reward - https://campaigner-oioe.onrender.com/refer_customer/{campaign_customer.referral_code}\n\nBest regards,\n{business_owner.business_name}',
-                        business_owner.user.email,
+                        "apurvabanka1712@gmail.com",
                         [customer.email],
                         fail_silently=False,
                     )
