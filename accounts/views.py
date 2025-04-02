@@ -272,15 +272,15 @@ def generate_ai_campaign_response(prompt, current_step):
                         if isinstance(suggestion, dict) and 'name' in suggestion and 'description' in suggestion:
                             response_text += f"{i}. {suggestion['name']}\n"
                             response_text += f"   {suggestion['description']}\n\n"
-                    response_text += "Please select one of these campaign names or suggest your own."
+                    response_text += "Please select one of these campaign names or suggest your own. Respond with the Title of the campaign you want to create."
                 
                 elif current_step == 'campaignTitle':
                     response_text = "For your campaign, here are some reward type suggestions:\n\n"
                     for i, suggestion in enumerate(suggestions, 1):
                         if isinstance(suggestion, dict) and 'type' in suggestion and 'description' in suggestion:
-                            response_text += f"{i}. {suggestion['type']}\n"
+                            response_text += f"{i}. {suggestion['type']} \n "
                             response_text += f"   {suggestion['description']}\n\n"
-                    response_text += "Please select one of these reward types or suggest your own."
+                    response_text += "Please select one of these reward types or suggest your own. Make sure to respond with the Reward Type you want to create."
                 
                 elif current_step == 'rewardType':
                     response_text = "For your reward type, here are some duration suggestions:\n\n"
@@ -288,12 +288,12 @@ def generate_ai_campaign_response(prompt, current_step):
                         if isinstance(suggestion, dict) and 'duration' in suggestion and 'description' in suggestion:
                             response_text += f"{i}. {suggestion['duration']} days\n"
                             response_text += f"   {suggestion['description']}\n\n"
-                    response_text += "Please select one of these durations or suggest your own."
+                    response_text += "Please select one of these durations or suggest your own. Make sure to respond with the Duration of the campaign you want to create."
                 
                 return response_text
             else:
                 print(f"Invalid response structure: {parsed_response}")
-                return "I apologize, but I couldn't generate appropriate suggestions. Please try again with a different input."
+                # return "I apologize, but I couldn't generate appropriate suggestions. Please try again with a different input."
         except json.JSONDecodeError as e:
             print(f"JSON decode error: {str(e)}")
             print(f"Failed to parse text: {generated_text}")

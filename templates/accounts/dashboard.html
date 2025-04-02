@@ -1132,6 +1132,8 @@
             <div class="message assistant">
                 Hello! I'll help you create a campaign using AI. Let's start with some basic information:
                 <br><br>
+                Make sure to add customers (by clicking on the Customers tab) before creating a campaign.
+                <br><br>
                 What type of business do you have? (e.g., e-commerce, service-based, subscription-based)
             </div>
         </div>
@@ -1323,8 +1325,6 @@
                     })
                 });
 
-                console.log(response);
-
                 if (!response.ok) {
                     throw new Error(`API request failed: ${response.status}`);
                 }
@@ -1409,7 +1409,6 @@
                         - Fixed Amount Discount
                         - Free Shipping
                         - Free Product
-                        - Points
                         
                         Format the response as JSON:
                         {
