@@ -15,6 +15,8 @@ from django.views.decorators.http import require_http_methods
 import json
 import requests
 from django.conf import settings
+from django.contrib import messages
+from django.db.utils import IntegrityError
 
 @login_required
 def dashboard(request):
@@ -47,9 +49,43 @@ def bulk_upload_customers(request):
         csv_file = request.FILES['file']
         owner = BusinessOwner.objects.get(user=request.user)
         csv_reader = csv.reader(TextIOWrapper(csv_file, encoding='utf-8'))
+        
+        # Get headers and find name and email column indices
+        headers = next(csv_reader)
+        headers = [h.lower() for h in headers]
+        
+        try:
+            name_index = next(i for i, h in enumerate(headers) if 'name' in h)
+            email_index = next(i for i, h in enumerate(headers) if 'email' in h)
+        except StopIteration:
+            messages.error(request, 'CSV file must contain name and email columns')
+            return redirect('bulk_upload_customers')
+        
+        # Process each row
+        skipped_emails = []
+        created_count = 0
+        
         for row in csv_reader:
-            email, name = row
-            Customer.objects.create(email=email, name=name, owner=owner)
+            if len(row) > max(name_index, email_index):
+                name = row[name_index].strip()
+                email = row[email_index].strip()
+                if name and email:  # Only process if both fields are non-empty
+                    try:
+                        Customer.objects.create(email=email, name=name, owner=owner)
+                        created_count += 1
+                    except IntegrityError:
+                        skipped_emails.append(email)
+        
+        # Prepare success message with details
+        message = f'Successfully uploaded {created_count} customers.'
+        if skipped_emails:
+            message += f' Skipped {len(skipped_emails)} duplicate emails.'
+            if len(skipped_emails) <= 5:  # Show up to 5 duplicate emails
+                message += f' Duplicates: {", ".join(skipped_emails)}'
+            else:
+                message += f' First 5 duplicates: {", ".join(skipped_emails[:5])}...'
+        
+        messages.success(request, message)
         return redirect('dashboard')
     return render(request, 'accounts/bulk_upload_customers.html')
 

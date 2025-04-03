@@ -286,6 +286,56 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+
+        .validation-error {
+            background: linear-gradient(135deg, #fff5f5 0%, #fff1f1 100%);
+            color: #e53e3e;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid #fc8181;
+            box-shadow: 0 2px 4px rgba(252, 129, 129, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        .validation-success {
+            background: linear-gradient(135deg, #c6f6d5 0%, #9ae6b4 100%);
+            color: #2f855a;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid #9ae6b4;
+            box-shadow: 0 2px 4px rgba(154, 230, 180, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .validation-error i,
+        .validation-success i {
+            font-size: 1.25rem;
+        }
+
+        .validation-error span,
+        .validation-success span {
+            font-weight: 500;
         }
 
         @media (max-width: 640px) {
@@ -364,6 +414,16 @@
                     </div>
                 </div>
 
+                <div id="validationError" class="validation-error" style="display: none;">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span id="validationMessage"></span>
+                </div>
+
+                <div id="validationSuccess" class="validation-success" style="display: none;">
+                    <i class="fas fa-check-circle"></i>
+                    <span>File is valid and ready to upload</span>
+                </div>
+
                 <div class="button-group">
                     <button type="submit" id="submitBtn" disabled>
                         <i class="fas fa-upload"></i>
@@ -382,6 +442,12 @@
         const fileSize = document.getElementById('fileSize');
         const removeFile = document.getElementById('removeFile');
         const submitBtn = document.getElementById('submitBtn');
+        const validationError = document.getElementById('validationError');
+        const validationMessage = document.getElementById('validationMessage');
+        const validationSuccess = document.getElementById('validationSuccess');
+
+        // Required headers
+        const requiredHeaders = ['name', 'email'];
 
         // Handle drag and drop events
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
@@ -423,18 +489,87 @@
             handleFiles(this.files);
         });
 
-        function handleFiles(files) {
+        async function handleFiles(files) {
             if (files.length > 0) {
                 const file = files[0];
+                // Clear any existing messages before validation
+                hideValidationError();
+                hideValidationSuccess();
+                
                 if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
-                    fileName.textContent = file.name;
-                    fileSize.textContent = formatFileSize(file.size);
-                    selectedFile.classList.add('show');
-                    submitBtn.disabled = false;
+                    try {
+                        const headers = await readCSVHeaders(file);
+                        const missingHeaders = validateHeaders(headers);
+                        
+                        if (missingHeaders.length > 0) {
+                            showValidationError(`Missing required columns: ${missingHeaders.join(', ')}`);
+                            return;
+                        }
+
+                        fileName.textContent = file.name;
+                        fileSize.textContent = formatFileSize(file.size);
+                        selectedFile.classList.add('show');
+                        submitBtn.disabled = false;
+                        showValidationSuccess();
+                    } catch (error) {
+                        showValidationError('Error reading file. Please try again.');
+                    }
                 } else {
-                    alert('Please upload a CSV file');
+                    showValidationError('Please upload a CSV file');
                 }
             }
+        }
+
+        async function readCSVHeaders(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const content = e.target.result;
+                        const firstLine = content.split('\n')[0];
+                        const headers = firstLine.split(',').map(header => header.trim().toLowerCase());
+                        resolve(headers);
+                    } catch (error) {
+                        reject(error);
+                    }
+                };
+                reader.onerror = reject;
+                reader.readAsText(file);
+            });
+        }
+
+        function validateHeaders(headers) {
+            // Check if at least one column contains 'name' and one contains 'email'
+            const hasName = headers.some(header => header.includes('name'));
+            const hasEmail = headers.some(header => header.includes('email'));
+            
+            const missingHeaders = [];
+            if (!hasName) missingHeaders.push('name');
+            if (!hasEmail) missingHeaders.push('email');
+            
+            return missingHeaders;
+        }
+
+        function showValidationError(message) {
+            validationMessage.textContent = message;
+            validationError.style.display = 'flex';
+            validationSuccess.style.display = 'none';
+            selectedFile.classList.remove('show');
+            submitBtn.disabled = true;
+        }
+
+        function showValidationSuccess() {
+            validationError.style.display = 'none';
+            validationSuccess.style.display = 'flex';
+        }
+
+        function hideValidationError() {
+            validationError.style.display = 'none';
+            validationMessage.textContent = '';
+        }
+
+        function hideValidationSuccess() {
+            validationSuccess.style.display = 'none';
         }
 
         // Remove file
@@ -442,6 +577,8 @@
             fileInput.value = '';
             selectedFile.classList.remove('show');
             submitBtn.disabled = true;
+            hideValidationError();
+            hideValidationSuccess();
         });
 
         // Format file size
