@@ -564,7 +564,7 @@
                     <div class="error-message">Please select a reward type</div>
                 </div>
 
-                <div class="form-group" id="amountGroup" style="display: none;">
+                <div class="form-group">
                     <label for="amount">Reward Amount</label>
                     <div class="input-group">
                         <span class="input-prefix">$</span>
@@ -575,7 +575,8 @@
                                step="0.01" 
                                placeholder="0.00"
                                pattern="[0-9]*\.?[0-9]*"
-                               inputmode="decimal">
+                               inputmode="decimal"
+                               required>
                         <div class="amount-suffix">per referral</div>
                     </div>
                     <div class="help-text">Enter the reward amount for each successful referral</div>
@@ -728,7 +729,6 @@
         // Define all required variables at the beginning
         const taskSelect = document.getElementById('task');
         const amountInput = document.getElementById('amount');
-        const amountGroup = document.getElementById('amountGroup');
         const generateDescBtn = document.getElementById('generateDesc');
         const titleInput = document.getElementById('title');
         const descriptionInput = document.getElementById('description');
@@ -811,8 +811,6 @@
                 const amountMatch = text.match(/\$(\d+\.?\d*)/) || text.match(/(\d+)%/);
                 if (amountMatch) {
                     amountInput.value = amountMatch[1];
-                    amountGroup.style.display = 'block';
-                    amountInput.required = true;
                 }
                 
                 // Highlight the selected suggestion
@@ -863,25 +861,28 @@
             updatePreview();
         });
 
-        // Handle reward type selection
-        taskSelect.addEventListener('change', function() {
-            const selectedType = this.value;
-            if (selectedType) {
-                amountGroup.style.display = 'block';
-                amountInput.required = true;
-            } else {
-                amountGroup.style.display = 'none';
-                amountInput.required = false;
-            }
-            updatePreview();
-        });
+        // Set up automatic description generation
+        let descriptionTimeout = null;
 
-        // Update the generate description functionality
-        generateDescBtn.addEventListener('click', async function() {
+        function setupAutoDescription() {
+            titleInput.addEventListener('input', function() {
+                // Clear any existing timeout
+                if (descriptionTimeout) {
+                    clearTimeout(descriptionTimeout);
+                }
+                
+                // Set new timeout for 2 seconds
+                descriptionTimeout = setTimeout(async () => {
+                    await generateDescription();
+                }, 2000); // 2 second delay
+            });
+        }
+
+        // Function to generate description
+        async function generateDescription() {
             const title = titleInput.value.trim();
             if (!title) {
-                alert('Please enter a campaign title first');
-                return;
+                return; // Don't generate if title is empty
             }
 
             // Show loading state
@@ -942,18 +943,58 @@
                         updatePreview();
                     } catch (parseError) {
                         console.error('Error parsing AI response:', parseError);
-                        alert('Failed to parse the response. Please try again.');
                     }
-                } else {
-                    throw new Error('No response from API');
                 }
             } catch (error) {
                 console.error('Error generating content:', error);
-                alert('Failed to generate content. Please try again.');
             } finally {
                 // Reset button state
                 generateDescBtn.classList.remove('loading');
                 generateDescBtn.innerHTML = '<i class="fas fa-magic"></i> Generate Description';
+            }
+        }
+
+        // Add click event listener for the generate description button
+        generateDescBtn.addEventListener('click', async function() {
+            const title = titleInput.value.trim();
+            if (!title) {
+                alert('Please enter a campaign title first');
+                return;
+            }
+            await generateDescription();
+        });
+
+        // Check for stored campaign data
+        document.addEventListener('DOMContentLoaded', function() {
+            const storedData = sessionStorage.getItem('aiCampaignData');
+            if (storedData) {
+                const campaignData = JSON.parse(storedData);
+                
+                // Populate form fields
+                document.getElementById('title').value = campaignData.campaignTitle || '';
+                document.getElementById('description').value = campaignData.description || '';
+                var rewardType = {
+                    'Cash Reward': 'cash',
+                    'Discount Amount': 'discount',
+                    'Reward Points': 'points',
+                    'Gift Card': 'gift'
+                }
+                document.getElementById('task').value = rewardType[campaignData.rewardType];
+                
+                const days = parseInt(campaignData.duration.split(' ')[0]);
+                const startDate = new Date();
+                document.getElementById('start_date').value = startDate.toISOString().split('T')[0];
+                
+                // Calculate end date
+                const endDate = new Date(startDate);
+                endDate.setDate(endDate.getDate() + days);
+                document.getElementById('end_date').value = endDate.toISOString().split('T')[0];
+                
+                // Clear the stored data after populating
+                sessionStorage.removeItem('aiCampaignData');
+            } else {
+                // Set up automatic description generation for manual campaign creation
+                setupAutoDescription();
             }
         });
 
@@ -1059,37 +1100,6 @@
                 setTimeout(() => banner.remove(), 300);
             }, 5000);
         }
-
-        // Check for stored campaign data
-        document.addEventListener('DOMContentLoaded', function() {
-            const storedData = sessionStorage.getItem('aiCampaignData');
-            if (storedData) {
-                const campaignData = JSON.parse(storedData);
-                
-                // Populate form fields
-                document.getElementById('title').value = campaignData.campaignTitle || '';
-                document.getElementById('description').value = campaignData.description || '';
-                var rewardType = {
-                    'Cash Reward': 'cash',
-                    'Discount Amount': 'discount',
-                    'Reward Points': 'points',
-                    'Gift Card': 'gift'
-                }
-                document.getElementById('task').value = rewardType[campaignData.rewardType];
-                // document.getElementById('duration').value = campaignData.duration.split(' ')[0];
-                
-                days = campaignData.duration.split(' ')[0];
-                const startDate = new Date();
-                document.getElementById('start_date').value = startDate.toISOString().split('T')[0];
-                
-                // Calculate end date
-                const endDate = new Date(startDate);
-                endDate.setDate(endDate.getDate() + days);
-                document.getElementById('end_date').value = endDate.toISOString().split('T')[0];
-                // Clear the stored data after populating
-                sessionStorage.removeItem('aiCampaignData');
-            }
-        });
     </script>
 </body>
 </html>

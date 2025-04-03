@@ -1395,7 +1395,7 @@
                             "suggestions": [
                                 {
                                     "name": "short campaign name",
-                                    "description": "brief 1-line description"
+                                    "description": "brief description"
                                 }
                             ]
                         }`;
@@ -1404,6 +1404,7 @@
                         // Store the selected campaign name
                         const selectedName = message.split('.')[1]?.trim() || message;
                         campaignData.campaignTitle = selectedName;
+                        campaignData.description = selectedName;
                         prompt = `Based on the selected campaign title: "${selectedName}", suggest a reward type from these options. Give all options:
                         - Cash Reward
                         - Discount Amount
