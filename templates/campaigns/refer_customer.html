@@ -177,21 +177,109 @@
             margin-bottom: 0.5rem;
         }
 
-        .campaign-info .reward {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: #ebf4ff;
-            color: #4299e1;
-            padding: 0.5rem 1rem;
-            border-radius: 0.375rem;
-            font-size: 0.875rem;
-            font-weight: 500;
-            margin-top: 1rem;
+        .task-section {
+            background: #f0f9ff;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 1rem 0;
+            border: 1px solid #90cdf4;
         }
 
-        .campaign-info .reward i {
+        .task-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .task-header i {
+            color: #3182ce;
+            font-size: 1.25rem;
+        }
+
+        .task-header h3 {
+            color: #2d3748;
             font-size: 1rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .task-details {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .task-type {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #3182ce;
+        }
+
+        .task-type i {
+            font-size: 1.25rem;
+        }
+
+        .task-description {
+            color: #4a5568;
+            font-size: 0.875rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid #bee3f8;
+        }
+
+        .reward-section {
+            background: #ebf4ff;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            border: 1px solid #4299e1;
+        }
+
+        .reward-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .reward-header i {
+            color: #4299e1;
+            font-size: 1.25rem;
+        }
+
+        .reward-header h3 {
+            color: #2d3748;
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .reward-details {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .reward-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #4299e1;
+        }
+
+        .reward-type {
+            color: #4a5568;
+            font-size: 0.875rem;
+        }
+
+        .reward-description {
+            color: #4a5568;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid #bee3f8;
         }
 
         .form-group label .optional-badge {
@@ -209,6 +297,255 @@
         .form-group textarea::placeholder {
             color: #a0aec0;
             font-size: 0.875rem;
+        }
+
+        .email-list {
+            background: #f8fafc;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .email-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            min-height: 2.5rem;
+        }
+
+        .email-tag {
+            background: #ebf4ff;
+            color: #4299e1;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .email-tag .remove-tag {
+            color: #4299e1;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+
+        .email-tag .remove-tag:hover {
+            background: rgba(66, 153, 225, 0.2);
+        }
+
+        .email-input-container {
+            position: relative;
+        }
+
+        .email-input {
+            width: 100%;
+            min-height: 100px;
+            padding: 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            font-family: monospace;
+            font-size: 0.875rem;
+            resize: vertical;
+            background: white;
+            transition: all 0.2s;
+        }
+
+        .email-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .email-input::placeholder {
+            color: #a0aec0;
+        }
+
+        .email-help {
+            color: #718096;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .email-help i {
+            color: #4299e1;
+        }
+
+        .email-count {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background: #ebf4ff;
+            color: #4299e1;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .invalid-email {
+            background: #fff5f5;
+            color: #e53e3e;
+            border-color: #fc8181;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+
+        .generate-message-btn {
+            background: #ebf4ff;
+            color: #4299e1;
+            border: 1px solid #4299e1;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.2s;
+        }
+
+        .generate-message-btn:hover {
+            background: #bee3f8;
+        }
+
+        .generate-message-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid #4299e1;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .referral-entry {
+            background: #f8fafc;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid #e2e8f0;
+            position: relative;
+        }
+
+        .remove-referral {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            color: #e53e3e;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s;
+        }
+
+        .remove-referral:hover {
+            background: rgba(229, 62, 62, 0.1);
+        }
+
+        .add-referral-btn {
+            background: #ebf4ff;
+            color: #4299e1;
+            border: 1px dashed #4299e1;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.2s;
+        }
+
+        .add-referral-btn:hover {
+            background: #bee3f8;
+        }
+
+        .referrals-container {
+            margin-bottom: 2rem;
+        }
+
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            color: #2d3748;
+            background-color: #f8fafc;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%234a5568' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            background-color: white;
+        }
+
+        .form-group select:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .task-type-select {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            color: #2d3748;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .task-type-select:hover {
+            border-color: #cbd5e0;
+        }
+
+        .task-type-select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
         @media (max-width: 640px) {
@@ -240,9 +577,82 @@
         <div class="campaign-info">
             <h2>{{ campaign.title }}</h2>
             <p>{{ campaign.description }}</p>
-            <div class="reward">
-                <i class="fas fa-gift"></i>
-                <span>Reward: {{ campaign.reward_value }}{% if campaign.reward_type == 'percentage' %}%{% elif campaign.reward_type == 'fixed' %}${% endif %}</span>
+            
+            <div class="task-section">
+                <div class="task-header">
+                    <i class="fas fa-tasks"></i>
+                    <h3>Task to Complete</h3>
+                </div>
+                <div class="task-details">
+                    <div class="task-type">
+                        {% if campaign.task_type == 'referral' %}
+                            <i class="fas fa-user-plus"></i>
+                            Refer New Customers
+                        {% elif campaign.task_type == 'quiz' %}
+                            <i class="fas fa-question-circle"></i>
+                            Complete a Quiz
+                        {% elif campaign.task_type == 'purchase' %}
+                            <i class="fas fa-shopping-cart"></i>
+                            Make a Purchase
+                        {% elif campaign.task_type == 'event' %}
+                            <i class="fas fa-calendar-check"></i>
+                            Attend an Event
+                        {% endif %}
+                    </div>
+                    <div class="task-description">
+                        {% if campaign.task_type == 'referral' %}
+                            Share this campaign with your network and get rewarded for each successful referral.
+                        {% elif campaign.task_type == 'quiz' %}
+                            Test your knowledge by completing our quiz and earn rewards.
+                        {% elif campaign.task_type == 'purchase' %}
+                            Make a purchase to qualify for the reward.
+                        {% elif campaign.task_type == 'event' %}
+                            Attend our event to claim your reward.
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="reward-section">
+                <div class="reward-header">
+                    <i class="fas fa-gift"></i>
+                    <h3>Referral Reward</h3>
+                </div>
+                <div class="reward-details">
+                    <div class="reward-value">
+                        {% if campaign.reward_type == 'cash' %}
+                            ${{ campaign.reward_amount }}
+                        {% elif campaign.reward_type == 'discount' %}
+                            ${{ campaign.reward_amount }} Discount
+                        {% elif campaign.reward_type == 'points' %}
+                            {{ campaign.reward_amount }} Points
+                        {% elif campaign.reward_type == 'gift' %}
+                            ${{ campaign.reward_amount }} Gift Card
+                        {% endif %}
+                    </div>
+                    <div class="reward-type">
+                        {% if campaign.reward_type == 'cash' %}
+                            Cash Reward
+                        {% elif campaign.reward_type == 'discount' %}
+                            Discount Amount
+                        {% elif campaign.reward_type == 'points' %}
+                            Reward Points
+                        {% elif campaign.reward_type == 'gift' %}
+                            Gift Card
+                        {% endif %}
+                    </div>
+                    <div class="reward-description">
+                        {% if campaign.reward_type == 'cash' %}
+                            You'll receive ${{ campaign.reward_amount }} for each successful referral.
+                        {% elif campaign.reward_type == 'discount' %}
+                            You'll receive a ${{ campaign.reward_amount }} discount for each successful referral.
+                        {% elif campaign.reward_type == 'points' %}
+                            You'll receive {{ campaign.reward_amount }} reward points for each successful referral.
+                        {% elif campaign.reward_type == 'gift' %}
+                            You'll receive a ${{ campaign.reward_amount }} gift card for each successful referral.
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -251,29 +661,41 @@
                 {% csrf_token %}
                 
                 <div class="form-group">
-                    <label for="name">Referral Name</label>
+                    <label for="name">Your Name</label>
                     <input type="text" id="name" name="name" required>
-                    <div class="help-text">Enter the full name of your referral</div>
-                    <div class="error-message">Please enter the customer's name</div>
+                    <div class="help-text">Enter your full name</div>
+                    <div class="error-message">Please enter your name</div>
+                </div>
+
+                <div class="email-list">
+                    <label for="emails">Referral Emails</label>
+                    <div class="email-tags" id="emailTags"></div>
+                    <div class="email-input-container">
+                        <textarea id="emails" name="emails" class="email-input" placeholder="Type email addresses and press Enter, or paste multiple emails"></textarea>
+                        <div class="email-count" id="emailCount">0 emails</div>
+                    </div>
+                    <div class="email-help">
+                        <i class="fas fa-info-circle"></i>
+                        <span>Press Enter or paste multiple emails. Invalid emails will be highlighted in red.</span>
+                    </div>
+                    <div class="error-message">Please enter at least one valid email address</div>
                 </div>
 
                 <div class="form-group">
-                    <label for="email">Referral Email</label>
-                    <input type="email" id="email" name="email" required>
-                    <div class="help-text">Enter a valid email address for your referral</div>
-                    <div class="error-message">Please enter a valid email address</div>
-                </div>
-
-                <div class="form-group">
-                    <label for="message">Personal Message</label>
+                    <label for="message">Message</label>
                     <textarea id="message" name="message" placeholder="Add a personal message to make your referral more effective..."></textarea>
-                    <div class="help-text">Share why you think this person would benefit from our service</div>
+                    <div class="help-text">Share why you think these people would benefit from our service</div>
                 </div>
+
+                <button type="button" class="generate-message-btn" id="generateMessageBtn">
+                    <i class="fas fa-magic"></i>
+                    Generate Message with AI
+                </button>
 
                 <div class="button-group">
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-paper-plane"></i>
-                        Send Referral
+                        Send Referrals
                     </button>
                     <a href="{% url 'dashboard' %}" class="btn btn-secondary">
                         <i class="fas fa-times"></i>
@@ -285,25 +707,142 @@
     </div>
 
     <script>
-        // Form validation
         const form = document.getElementById('referralForm');
-        const inputs = form.querySelectorAll('input[required], textarea');
+        const generateMessageBtn = document.getElementById('generateMessageBtn');
+        const messageTextarea = document.getElementById('message');
+        const emailInput = document.getElementById('emails');
+        const emailTags = document.getElementById('emailTags');
+        const emailCount = document.getElementById('emailCount');
 
+        // Email validation regex
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        // Function to validate email
+        function isValidEmail(email) {
+            return emailRegex.test(email.trim());
+        }
+
+        // Function to create email tag
+        function createEmailTag(email, isValid) {
+            const tag = document.createElement('div');
+            tag.className = `email-tag ${isValid ? '' : 'invalid-email'}`;
+            tag.innerHTML = `
+                <span>${email}</span>
+                <span class="remove-tag" onclick="removeEmailTag(this)">×</span>
+            `;
+            return tag;
+        }
+
+        // Function to remove email tag
+        function removeEmailTag(element) {
+            element.closest('.email-tag').remove();
+            updateEmailCount();
+        }
+
+        // Function to update email count
+        function updateEmailCount() {
+            const validEmails = document.querySelectorAll('.email-tag:not(.invalid-email)').length;
+            emailCount.textContent = `${validEmails} email${validEmails !== 1 ? 's' : ''}`;
+        }
+
+        // Handle email input
+        emailInput.addEventListener('input', function(e) {
+            const value = e.target.value;
+            const lastChar = value[value.length - 1];
+            
+            if (lastChar === ',' || lastChar === ' ' || lastChar === '\n') {
+                const emails = value.split(/[,\s\n]+/).filter(email => email.trim());
+                emails.forEach(email => {
+                    const isValid = isValidEmail(email);
+                    const tag = createEmailTag(email, isValid);
+                    emailTags.appendChild(tag);
+                });
+                e.target.value = '';
+                updateEmailCount();
+            }
+        });
+
+        // Handle paste event
+        emailInput.addEventListener('paste', function(e) {
+            e.preventDefault();
+            const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+            const emails = pastedText.split(/[,\s\n]+/).filter(email => email.trim());
+            
+            emails.forEach(email => {
+                const isValid = isValidEmail(email);
+                const tag = createEmailTag(email, isValid);
+                emailTags.appendChild(tag);
+            });
+            updateEmailCount();
+        });
+
+        // Update form validation
         form.addEventListener('submit', function(e) {
             let isValid = true;
-            inputs.forEach(input => {
-                const formGroup = input.closest('.form-group');
-                if (!input.value.trim()) {
-                    formGroup.classList.add('error');
-                    isValid = false;
-                } else {
-                    formGroup.classList.remove('error');
-                }
-            });
+            const nameInput = document.getElementById('name');
+            const validEmails = document.querySelectorAll('.email-tag:not(.invalid-email)');
+            
+            if (!nameInput.value.trim()) {
+                nameInput.closest('.form-group').classList.add('error');
+                isValid = false;
+            } else {
+                nameInput.closest('.form-group').classList.remove('error');
+            }
+            
+            if (validEmails.length === 0) {
+                emailInput.closest('.email-list').classList.add('error');
+                isValid = false;
+            } else {
+                emailInput.closest('.email-list').classList.remove('error');
+                // Collect all valid emails and set them in the hidden input
+                const emails = Array.from(validEmails).map(tag => tag.querySelector('span').textContent).join('\n');
+                emailInput.value = emails;
+            }
 
             if (!isValid) {
                 e.preventDefault();
-                alert('Please fill in all required fields');
+                alert('Please fill in all required fields and ensure you have at least one valid email address');
+            }
+        });
+
+        // Generate message with AI
+        generateMessageBtn.addEventListener('click', async function() {
+            const name = document.getElementById('name').value.trim();
+            const validEmails = document.querySelectorAll('.email-tag:not(.invalid-email)').length;
+            
+            if (!name || validEmails === 0) {
+                alert('Please enter your name and at least one valid email address first');
+                return;
+            }
+
+            generateMessageBtn.disabled = true;
+            generateMessageBtn.innerHTML = '<span class="loading"></span> Generating...';
+
+            try {
+                const response = await fetch('/generate-ai-response/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    },
+                    body: JSON.stringify({
+                        prompt: `Generate a friendly and professional referral message for a business service. Do not incluide any placeholders. The message should highlight the benefits of the service and encourage the recipient to try it out. Keep it concise, engaging and in a paragraph. Do not include any place holders.`,
+                        type: 'chatbot'
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to generate message');
+                }
+
+                const data = await response.json();
+                // Add a personal touch at the beginning
+                messageTextarea.value = `Hi there,\n\n${data.response}\n\nBest regards,\n${name}`;
+            } catch (error) {
+                alert('Failed to generate message. Please try again.');
+            } finally {
+                generateMessageBtn.disabled = false;
+                generateMessageBtn.innerHTML = '<i class="fas fa-magic"></i> Generate Message with AI';
             }
         });
     </script>

@@ -72,49 +72,63 @@ def analytics_view(request):
     return render(request, 'campaigns/analytics.html', {'customers': customers, 'referrals': referrals})
 
 def refer_customer(request, referral_code):
-    if request.method == 'POST':
-        form = ReferralForm(request.POST)
-        if form.is_valid():
-            referred_email = form.cleaned_data['email']
-            try:
-                campaign_customer = CampaignCustomer.objects.get(referral_code=referral_code)
-                campaign = campaign_customer.campaign
+    try:
+        campaign_customer = CampaignCustomer.objects.get(referral_code=referral_code)
+        campaign = campaign_customer.campaign
+        
+        if request.method == 'POST':
+            form = ReferralForm(request.POST)
+            if form.is_valid():
+                emails = form.cleaned_data['emails']
+                name = form.cleaned_data['name']
+                message = form.cleaned_data.get('message', '')
                 
-                Referral.objects.create(
-                    customer=campaign_customer.customer,
-                    campaign=campaign,
-                    referred_email=referred_email
-                )
+                # Create referrals for each email
+                for email in emails:
+                    Referral.objects.create(
+                        customer=campaign_customer.customer,
+                        campaign=campaign,
+                        referred_email=email
+                    )
                 
-                # Reward the referring customer based on campaign reward type
-                campaign_customer.customer.referrals_sent += 1
-                
-                # Add reward points based on campaign type
+                # Update customer stats
+                campaign_customer.customer.referrals_sent += len(emails)
                 if campaign.reward_type == 'points':
-                    campaign_customer.customer.reward_points += int(campaign.reward_amount)
-                
+                    campaign_customer.customer.reward_points += int(campaign.reward_amount) * len(emails)
                 campaign_customer.customer.save()
                 
-                # Send email to the referred individual
+                # Send email to each referred individual
                 try:
-                    send_mail(
-                        'You have been referred!',
-                        f'Hello {form.cleaned_data["name"]},\n\nYou have been referred to join our campaign: {campaign.title}.\n\nReward: {campaign.reward_amount}{"%" if campaign.reward_type == "discount" else "$" if campaign.reward_type in ["cash", "gift"] else " points"}\n\nPlease use the referral code to get onboarded {campaign_customer.referral_code}.\n\n You can use this link to compelte the onboarding process. https://campaigner-oioe.onrender.com/onboard/ \n\nBest regards,\n{campaign_customer.customer.owner.business_name}',
-                        'apurvabanka1712@gmail.com',
-                        [referred_email],
-                        fail_silently=False,
-                    )
+                    for email in emails:
+                        send_mail(
+                            'You have been referred!',
+                            f'Hello,\n\nYou have been referred to join our campaign: {campaign.title}.\n\nReward: {campaign.reward_amount}{"%" if campaign.reward_type == "discount" else "$" if campaign.reward_type in ["cash", "gift"] else " points"}\n\nPlease use the referral code to get onboarded {campaign_customer.referral_code}.\n\nYou can use this link to complete the onboarding process: https://campaigner-oioe.onrender.com/onboard/\n\nBest regards,\n{campaign_customer.customer.owner.business_name}',
+                            'apurvabanka1712@gmail.com',
+                            [email],
+                            fail_silently=False,
+                        )
+                    return redirect('thank_you')
                 except BadHeaderError:
                     return HttpResponse('Invalid header found.')
                 except Exception as e:
                     return HttpResponse(f'An error occurred: {e}')
-                
-                return redirect('thank_you')
-            except CampaignCustomer.DoesNotExist:
-                return HttpResponse('Invalid referral code.')
-    else:
-        form = ReferralForm()
-    return render(request, 'campaigns/refer_customer.html', {'form': form, 'referral_code': referral_code})
+            else:
+                # If form is invalid, render the page again with errors
+                return render(request, 'campaigns/refer_customer.html', {
+                    'form': form,
+                    'referral_code': referral_code,
+                    'campaign': campaign
+                })
+        else:
+            form = ReferralForm()
+        
+        return render(request, 'campaigns/refer_customer.html', {
+            'form': form,
+            'referral_code': referral_code,
+            'campaign': campaign
+        })
+    except CampaignCustomer.DoesNotExist:
+        return HttpResponse('Invalid referral code.')
 
 def thank_you(request):
     return render(request, 'campaigns/thank_you.html')

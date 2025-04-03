@@ -3,6 +3,13 @@ from django.db import models
 from accounts.models import BusinessOwner, Customer
 
 class Campaign(models.Model):
+    TASK_TYPE_CHOICES = [
+        ('referral', 'Referral'),
+        ('quiz', 'Quiz or Trivia'),
+        ('purchase', 'Make a Purchase'),
+        ('event', 'Attend an Event'),
+    ]
+    
     owner = models.ForeignKey(BusinessOwner, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     description = models.TextField()
@@ -15,6 +22,7 @@ class Campaign(models.Model):
         ('gift', 'Gift Card')
     ], default='cash')
     reward_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    task_type = models.CharField(max_length=20, choices=TASK_TYPE_CHOICES, default='referral')
 
 # Customer that are part of a campaign
 class CampaignCustomer(models.Model):
