@@ -1134,7 +1134,7 @@
                 <br><br>
                 Make sure to add customers (by clicking on the Customers tab) before creating a campaign.
                 <br><br>
-                What type of business do you have? (e.g., e-commerce, service-based, subscription-based)
+                <strong>What type of business do you have?</strong> (e.g., e-commerce, service-based, subscription-based)
             </div>
         </div>
         <div class="chat-input">
@@ -1404,11 +1404,11 @@
                         // Store the selected campaign name
                         const selectedName = message.split('.')[1]?.trim() || message;
                         campaignData.campaignTitle = selectedName;
-                        prompt = `Based on the selected campaign title: "${selectedName}", suggest a reward type from these options:
-                        - Percentage Discount
-                        - Fixed Amount Discount
-                        - Free Shipping
-                        - Free Product
+                        prompt = `Based on the selected campaign title: "${selectedName}", suggest a reward type from these options. Give all options:
+                        - Cash Reward
+                        - Discount Amount
+                        - Reward Points
+                        - Gift Card
                         
                         Format the response as JSON:
                         {
@@ -1512,7 +1512,7 @@
         function addAICampaignMessage(text, type, isTyping = false) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${type}${isTyping ? ' typing' : ''}`;
-            messageDiv.textContent = text;
+            messageDiv.innerHTML = text;
             aiCampaignMessages.appendChild(messageDiv);
             aiCampaignMessages.scrollTop = aiCampaignMessages.scrollHeight;
             return messageDiv;

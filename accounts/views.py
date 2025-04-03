@@ -306,27 +306,27 @@ def generate_ai_campaign_response(prompt, current_step):
                 suggestions = parsed_response['suggestions']
                 
                 if current_step == 'businessType':
-                    response_text = "Based on your business type, here are some campaign suggestions:\n\n"
+                    response_text = "Based on your business type, here are some campaign suggestions:<br><br>"
                     for i, suggestion in enumerate(suggestions, 1):
                         if isinstance(suggestion, dict) and 'name' in suggestion and 'description' in suggestion:
-                            response_text += f"{i}. {suggestion['name']}\n"
-                            response_text += f"   {suggestion['description']}\n\n"
+                            response_text += f"{i}. {suggestion['name']}<br>"
+                            # response_text += f"   {suggestion['description']}<br><br>"
                     response_text += "Please select one of these campaign names or suggest your own. Respond with the Title of the campaign you want to create."
                 
                 elif current_step == 'campaignTitle':
-                    response_text = "For your campaign, here are some reward type suggestions:\n\n"
+                    response_text = "For your campaign, here are some reward type suggestions:<br><br>"
                     for i, suggestion in enumerate(suggestions, 1):
                         if isinstance(suggestion, dict) and 'type' in suggestion and 'description' in suggestion:
-                            response_text += f"{i}. {suggestion['type']} \n "
-                            response_text += f"   {suggestion['description']}\n\n"
+                            response_text += f"{i}. {suggestion['type']} <br>"
+                            # response_text += f"   {suggestion['description']}<br><br>"
                     response_text += "Please select one of these reward types or suggest your own. Make sure to respond with the Reward Type you want to create."
                 
                 elif current_step == 'rewardType':
-                    response_text = "For your reward type, here are some duration suggestions:\n\n"
+                    response_text = "For your reward type, here are some duration suggestions:<br><br>"
                     for i, suggestion in enumerate(suggestions, 1):
                         if isinstance(suggestion, dict) and 'duration' in suggestion and 'description' in suggestion:
-                            response_text += f"{i}. {suggestion['duration']} days\n"
-                            response_text += f"   {suggestion['description']}\n\n"
+                            response_text += f"{i}. {suggestion['duration']} days<br>"
+                            response_text += f"   {suggestion['description']}<br><br>"
                     response_text += "Please select one of these durations or suggest your own. Make sure to respond with the Duration of the campaign you want to create."
                 
                 return response_text
