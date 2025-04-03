@@ -57,6 +57,9 @@ def register_or_login(request):
     if request.user.is_authenticated:
         return redirect('dashboard')
     
+    form = BusinessOwnerForm()
+    login_form = LoginForm()
+    
     if request.method == 'POST':
         if 'register' in request.POST:
             form = BusinessOwnerForm(request.POST)
@@ -82,9 +85,9 @@ def register_or_login(request):
                 if user is not None:
                     login(request, user)
                     return redirect('dashboard')
-    else:
-        form = BusinessOwnerForm()
-        login_form = LoginForm()
+                else:
+                    login_form.add_error(None, 'Incorrect username or password')
+    
     return render(request, 'accounts/register_or_login.html', {'form': form, 'login_form': login_form})
 
 @login_required

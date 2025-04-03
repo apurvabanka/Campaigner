@@ -199,6 +199,21 @@
             font-weight: 500;
             backdrop-filter: blur(5px);
         }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+
+        .login-error {
+            transition: all 0.3s ease;
+        }
+
+        .login-error:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(252, 129, 129, 0.15);
+        }
     </style>
 </head>
 <body>
@@ -227,6 +242,32 @@
             <h2>Login</h2>
             <form method="post">
                 {% csrf_token %}
+                {% if login_form.non_field_errors %}
+                <div class="login-error" style="
+                    margin-bottom: 1.5rem;
+                    text-align: center;
+                    background: linear-gradient(135deg, #fff5f5 0%, #fff1f1 100%);
+                    padding: 1rem;
+                    border-radius: 0.5rem;
+                    border: 1px solid #fc8181;
+                    box-shadow: 0 2px 4px rgba(252, 129, 129, 0.1);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 0.75rem;
+                    animation: shake 0.5s ease-in-out;
+                ">
+                    <i class="fas fa-exclamation-circle" style="
+                        color: #e53e3e;
+                        font-size: 1.25rem;
+                    "></i>
+                    <span style="
+                        color: #e53e3e;
+                        font-weight: 500;
+                        font-size: 0.95rem;
+                    ">{{ login_form.non_field_errors }}</span>
+                </div>
+                {% endif %}
                 {% for field in login_form %}
                 <div class="form-group">
                     <label for="{{ field.id_for_label }}">{{ field.label }}</label>
