@@ -73,8 +73,14 @@ def analytics_view(request):
 
 def refer_customer(request, referral_code):
     try:
+        # First check if the referral code exists
         campaign_customer = CampaignCustomer.objects.get(referral_code=referral_code)
         campaign = campaign_customer.campaign
+        
+        # Check if the campaign is still active
+        from datetime import date
+        if date.today() > campaign.end_date:
+            return HttpResponse('This campaign has ended.')
         
         if request.method == 'POST':
             form = ReferralForm(request.POST)
@@ -102,7 +108,7 @@ def refer_customer(request, referral_code):
                     for email in emails:
                         send_mail(
                             'You have been referred!',
-                            f'Hello,\n\nYou have been referred to join our campaign: {campaign.title}.\n\nReward: {campaign.reward_amount}{"%" if campaign.reward_type == "discount" else "$" if campaign.reward_type in ["cash", "gift"] else " points"}\n\nPlease use the referral code to get onboarded {campaign_customer.referral_code}.\n\nYou can use this link to complete the onboarding process: https://campaigner-oioe.onrender.com/onboard/\n\nBest regards,\n{campaign_customer.customer.owner.business_name}',
+                            f'Hello,\n\nYou have been referred to join our campaign: {campaign.title}.\n\nReward: {campaign.reward_amount}{"%" if campaign.reward_type == "discount" else "$" if campaign.reward_type in ["cash", "gift"] else " points"}\n\nPlease use the referral code to get onboarded {campaign_customer.referral_code}\n\nYou can use this link to complete the onboarding process: https://campaigner-oioe.onrender.com/onboard/\n\nBest regards,\n{campaign_customer.customer.owner.business_name}',
                             'apurvabanka1712@gmail.com',
                             [email],
                             fail_silently=False,
@@ -128,7 +134,9 @@ def refer_customer(request, referral_code):
             'campaign': campaign
         })
     except CampaignCustomer.DoesNotExist:
-        return HttpResponse('Invalid referral code.')
+        return HttpResponse('Invalid referral code. Please check the code and try again.')
+    except Exception as e:
+        return HttpResponse(f'An error occurred: {str(e)}')
 
 def thank_you(request):
     return render(request, 'campaigns/thank_you.html')
@@ -139,31 +147,57 @@ def onboarding(request):
         if form.is_valid():
             try:
                 campaign_customer = CampaignCustomer.objects.get(referral_code=form.cleaned_data['referral_code'])
-                referred_customer = Customer.objects.create(
+                
+                # Get or create the customer
+                referred_customer, created = Customer.objects.get_or_create(
                     email=form.cleaned_data['email'],
-                    name=form.cleaned_data['name'],
-                    owner=campaign_customer.customer.owner
+                    defaults={
+                        'name': form.cleaned_data['name'],
+                        'owner': campaign_customer.customer.owner
+                    }
                 )
+                
+                # Update name if it's different
+                if not created and referred_customer.name != form.cleaned_data['name']:
+                    referred_customer.name = form.cleaned_data['name']
+                    referred_customer.save()
+
+                # Update referring customer's stats
                 campaign_customer.customer.referrals_completed += 1
                 campaign_customer.customer.reward_points += 10
                 campaign_customer.customer.save()
 
                 new_referral_code = str(uuid.uuid4())
 
-                # Create a new CampaignCustomer for the referred customer
-                new_campaign_customer = CampaignCustomer.objects.create(
+                # Get or create the CampaignCustomer
+                new_campaign_customer, created = CampaignCustomer.objects.get_or_create(
                     customer=referred_customer,
                     campaign=campaign_customer.campaign,
-                    referral_code=new_referral_code
+                    defaults={'referral_code': new_referral_code}
                 )
+                
+                # Update referral code if it's an existing CampaignCustomer
+                if not created:
+                    new_campaign_customer.referral_code = new_referral_code
+                    new_campaign_customer.save()
                 
                 # Send email to the new customer with their referral code
                 try:
+                    # Email to the new customer
                     send_mail(
                         'Welcome to the campaign!',
                         f'Hello {referred_customer.name},\n\nWelcome to our campaign: {campaign_customer.campaign.title}.\n\n Your referral code is: {new_campaign_customer.referral_code}\n\n Use this link to refer new individuals and claim your reward - https://campaigner-oioe.onrender.com/refer_customer/{new_campaign_customer.referral_code} \n\nBest regards,\n{campaign_customer.customer.owner.business_name}',
                         'apurvabanka1712@gmail.com',
                         [referred_customer.email],
+                        fail_silently=False,
+                    )
+
+                    # Email to the referring customer
+                    send_mail(
+                        'Referral Completed!',
+                        f'Hello {campaign_customer.customer.name},\n\nGreat news! Your referral {referred_customer.name} has successfully joined the campaign: {campaign_customer.campaign.title}.\n\nYou have earned {campaign_customer.campaign.reward_amount}{"%" if campaign_customer.campaign.reward_type == "discount" else "$" if campaign_customer.campaign.reward_type in ["cash", "gift"] else " points"} in rewards.\n\nKeep referring more people to earn more rewards!\n\nBest regards,\n{campaign_customer.customer.owner.business_name}',
+                        'apurvabanka1712@gmail.com',
+                        [campaign_customer.customer.email],
                         fail_silently=False,
                     )
                 except BadHeaderError:
