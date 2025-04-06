@@ -1,11 +1,13 @@
 import uuid
-from django.http import BadHeaderError, HttpResponse
+from django.http import BadHeaderError, HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from accounts.models import BusinessOwner, Customer
 from campaigns.forms import CampaignForm, OnboardingForm, ReferralForm
 from .models import Campaign, CampaignCustomer, Referral
 from django.core.mail import send_mail
+from datetime import timedelta, datetime
+import json
 
 @login_required
 def create_campaign(request):
@@ -211,3 +213,81 @@ def onboarding(request):
     else:
         form = OnboardingForm()
     return render(request, 'campaigns/onboarding.html', {'form': form})
+
+@login_required
+def create_campaign_ajax(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            print(data)
+            owner = BusinessOwner.objects.get(user=request.user)
+            print(owner)
+            # Create the campaign
+            try:
+                campaign = Campaign.objects.create(
+                    owner=owner,
+                    title=data.get('title'),
+                    description=data.get('description'),
+                    reward_type=data.get('reward_type'),
+                    reward_amount=data.get('reward_amount'),
+                    task_type=data.get('task_type'),
+                    start_date=datetime.now(),
+                    end_date=datetime.now() + timedelta(days=int(data.get('duration', 30)))
+                )
+            except Exception as e:
+                print(e)
+            print("campaign created")
+            print(campaign)
+            # Get all customers for this owner
+            customers = Customer.objects.filter(owner=owner)
+            
+            # Create campaign customers and send emails
+            for customer in customers:
+                campaign_customer = CampaignCustomer.objects.create(
+                    campaign=campaign,
+                    customer=customer,
+                    referral_code=uuid.uuid4()
+                )
+                try:
+                    send_mail(
+                        'New Campaign Referral',
+                        f'Hello {customer.name},\n\nYou have been referred to a new campaign: {campaign.title}.\nYour referral code is: {campaign_customer.referral_code}.\n\nUse this link to refer new individuals and claim your reward - https://campaigner-oioe.onrender.com/refer_customer/{campaign_customer.referral_code}\n\nBest regards,\n{owner.business_name}',
+                        "apurvabanka1712@gmail.com",
+                        [customer.email],
+                        fail_silently=False,
+                    )
+                except BadHeaderError:
+                    return JsonResponse({
+                        'success': False,
+                        'error': 'Invalid email header'
+                    }, status=400)
+                except Exception as e:
+                    return JsonResponse({
+                        'success': False,
+                        'error': f'Email sending failed: {str(e)}'
+                    }, status=400)
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Campaign created successfully',
+                'campaign': {
+                    'title': campaign.title,
+                    'description': campaign.description,
+                    'reward_type': campaign.reward_type,
+                    'reward_amount': campaign.reward_amount,
+                    'task_type': campaign.task_type,
+                    'start_date': campaign.start_date,
+                    'end_date': campaign.end_date
+                }
+            })
+            
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=400)
+    
+    return JsonResponse({
+        'success': False,
+        'error': 'Invalid request method'
+    }, status=405)

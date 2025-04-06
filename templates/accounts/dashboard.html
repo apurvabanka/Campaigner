@@ -1,4 +1,3 @@
-{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -1131,11 +1130,12 @@
         </div>
         <div class="chat-messages">
             <div class="message assistant">
-                Hello! I'll help you create a campaign using AI. Let's start with some basic information:
+                Hello! I'll help you create a campaign using AI. Simply describe your campaign idea or what you'd like to achieve, and I'll help you create it.
                 <br><br>
-                Make sure to add customers (by clicking on the Customers tab) before creating a campaign.
+                For example, you could say:
+                "Create a referral campaign for my e-commerce store that gives customers 10% off for referring friends"
                 <br><br>
-                <strong>What type of business do you have?</strong> (e.g., e-commerce, service-based, subscription-based)
+                Make sure you have added customers before creating a campaign.
             </div>
         </div>
         <div class="chat-input">
@@ -1147,14 +1147,30 @@
     </div>
 
     <script>
+        // Helper function to get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
         // Initialize all variables at the top
-        const aiCampaignChat = document.querySelector('.ai-campaign-chat-window');
+        const createCampaignBtn = document.getElementById('create-campaign-btn');
         const createAICampaignBtn = document.getElementById('createAICampaign');
+        const aiCampaignChat = document.querySelector('.ai-campaign-chat-window');
         const closeAICampaignChatBtn = aiCampaignChat.querySelector('.close-chat');
         const aiCampaignInput = document.getElementById('aiCampaignInput');
         const sendAICampaignMessageBtn = document.getElementById('sendAICampaignMessage');
         const aiCampaignMessages = aiCampaignChat.querySelector('.chat-messages');
-        const createCampaignBtn = document.getElementById('createCampaignBtn');
 
         // Add click handlers for campaign creation buttons
         if (createCampaignBtn) {
@@ -1174,6 +1190,19 @@
                     e.preventDefault();
                     alert('Please add customers before creating a campaign.');
                 }
+            });
+        }
+
+        // Add event listener for campaign creation
+        if (createCampaignBtn) {
+            createCampaignBtn.addEventListener('click', function() {
+                const campaignData = {
+                    title: document.getElementById('campaign-title')?.value,
+                    description: document.getElementById('campaign-description')?.value,
+                    reward_type: document.getElementById('campaign-reward-type')?.value,
+                    duration: document.getElementById('campaign-duration')?.value
+                };
+                createCampaign(campaignData);
             });
         }
 
@@ -1410,125 +1439,182 @@
             const typingMessage = addAICampaignMessage('Thinking...', 'assistant', true);
 
             try {
-                let prompt = '';
-                switch (currentStep) {
-                    case 'businessType':
-                        campaignData.businessType = message;
-                        prompt = `Based on your business type: "${message}", suggest 3-5 short and catchy campaign names with brief descriptions (max 10 words each). Format the response as JSON:
-                        {
-                            "suggestions": [
-                                {
-                                    "name": "short campaign name",
-                                    "description": "brief description"
-                                }
-                            ]
-                        }`;
-                        break;
-                    case 'campaignTitle':
-                        // Store the selected campaign name
-                        const selectedName = message.split('.')[1]?.trim() || message;
-                        campaignData.campaignTitle = selectedName;
-                        campaignData.description = selectedName;
-                        prompt = `Based on the selected campaign title: "${selectedName}", suggest a reward type from these options. Give all options:
-                        - Cash Reward
-                        - Discount Amount
-                        - Reward Points
-                        - Gift Card
-                        
-                        Format the response as JSON:
-                        {
-                            "suggestions": [
-                                {
-                                    "type": "reward type",
-                                    "description": "brief 1-line explanation"
-                                }
-                            ]
-                        }`;
-                        break;
-                    case 'rewardType':
-                        // Store the selected reward type
-                        const selectedReward = message.split('.')[1]?.trim() || message;
-                        campaignData.rewardType = selectedReward;
-                        prompt = `Based on the selected reward type: "${selectedReward}", suggest a campaign duration. Consider:
-                        - Short-term campaigns (1-7 days)
-                        - Medium-term campaigns (8-30 days)
-                        - Long-term campaigns (31+ days)
-                        
-                        Format the response as JSON:
-                        {
-                            "suggestions": [
-                                {
-                                    "duration": "number of days",
-                                    "description": "brief 1-line explanation"
-                                }
-                            ]
-                        }`;
-                        break;
-                    case 'duration':
-                        // Store the selected duration
-                        const selectedDuration = message.split('.')[1]?.trim() || message;
-                        campaignData.duration = selectedDuration;
-                        break;
+                const response = await fetch('{% url "ai_campaign_assistant" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('input[name=csrfmiddlewaretoken]').value
+                    },
+                    body: JSON.stringify({
+                        prompt: message,
+                        type: 'campaign'
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Server response error:', response.status, errorText);
+                    throw new Error(`Server error: ${response.status}`);
                 }
 
-                if (currentStep !== 'duration') {
-                    const response = await fetch('{% url "ai_campaign_assistant" %}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': document.querySelector('input[name=csrfmiddlewaretoken]').value
-                        },
-                        body: JSON.stringify({
-                            prompt: prompt,
-                            currentStep: currentStep
-                        })
-                    });
+                const data = await response.json();
+                console.log('Received data:', data); // Debug log
+                
+                // Remove typing indicator
+                typingMessage.remove();
 
-                    if (!response.ok) {
-                        throw new Error(`API request failed: ${response.status}`);
-                    }
+                if (data.response) {
+                    // First try to parse as JSON
+                    try {
+                        const campaignResponse = typeof data.response === 'string' ? 
+                            JSON.parse(data.response) : data.response;
+                        
+                        console.log('Parsed campaign response:', campaignResponse); // Debug log
 
-                    const data = await response.json();
-                    
-                    // Remove typing indicator
-                    typingMessage.remove();
+                        // Store campaign data
+                        campaignData = {
+                            title: campaignResponse.title || campaignResponse.campaign?.title,
+                            description: campaignResponse.description || campaignResponse.campaign?.description,
+                            reward_type: campaignResponse.reward_type || campaignResponse.campaign?.reward_type,
+                            duration: campaignResponse.duration || campaignResponse.campaign?.duration,
+                            reward_amount: campaignResponse.reward_amount || campaignResponse.campaign?.reward_amount,
+                            task_type: campaignResponse.task_type || campaignResponse.campaign?.task_type,
+                        };
 
-                    if (data.response) {
-                        // The response is already formatted by the backend
+                        // Add the AI's response message
+                        const message = campaignResponse.message || 
+                            `Great! I've created a campaign called "${campaignData.title}" with ${campaignData.reward_type} rewards for ${campaignData.duration} days. Would you like to create this campaign?`;
+                        
+                        addAICampaignMessage(message, 'assistant');
+
+                        // Show campaign details
+                        addAICampaignMessage(`
+                            <div style="background: #f7fafc; padding: 1rem; border-radius: 0.5rem; margin-top: 0.5rem;">
+                                <strong>Campaign Details:</strong><br>
+                                Title: ${campaignData.title}<br>
+                                Description: ${campaignData.description}<br>
+                                Reward Type: ${campaignData.reward_type}<br>
+                                Duration: ${campaignData.duration} days<br>
+                                Reward Amount: ${campaignData.reward_amount}<br>
+                                Task Type: ${campaignData.task_type}<br>
+                                <br>
+                                <p>Please confirm the details and click the button below to create the campaign.</p>
+                            </div>
+                        `, 'assistant');
+                        
+                        // Show create campaign button
+                        const createCampaignBtn = document.createElement('button');
+                        createCampaignBtn.className = 'create-campaign-btn';
+                        createCampaignBtn.style.display = 'block';
+                        createCampaignBtn.textContent = 'Confirm Detials';
+                        createCampaignBtn.onclick = async function() {
+                            try {
+                                // Disable the button and show loading state
+                                createCampaignBtn.disabled = true;
+                                createCampaignBtn.textContent = 'Creating Campaign...';
+                                
+                                // Send campaign data to create_campaign_ajax endpoint
+                                const response = await fetch('{% url "create_campaign_ajax" %}', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRFToken': document.querySelector('input[name=csrfmiddlewaretoken]').value
+                                    },
+                                    body: JSON.stringify(campaignData)
+                                });
+
+                                if (!response.ok) {
+                                    throw new Error('Failed to create campaign');
+                                }
+
+                                const result = await response.json();
+                                
+                                if (result.success) {
+                                    // Show success message
+                                    addAICampaignMessage(`
+                                        <div style="background: #e6ffed; padding: 1rem; border-radius: 0.5rem; margin-top: 0.5rem;">
+                                            <strong>Success!</strong> Campaign "${result.campaign.title}" has been created successfully.
+                                        </div>
+                                    `, 'assistant');
+
+                                    // Update the campaigns grid
+                                    const campaignsGrid = document.querySelector('.campaigns-grid');
+                                    if (campaignsGrid) {
+                                        const emptyState = campaignsGrid.querySelector('.empty-state');
+                                        if (emptyState) {
+                                            emptyState.remove();
+                                        }
+                                        
+                                        const newCampaignCard = document.createElement('div');
+                                        newCampaignCard.className = 'campaign-card';
+                                        newCampaignCard.innerHTML = `
+                                            <div class="campaign-icon">
+                                                <i class="fas fa-bullhorn"></i>
+                                            </div>
+                                            <div class="campaign-content">
+                                                <h3>${result.campaign.title}</h3>
+                                                <p>${result.campaign.description}</p>
+                                                <div class="campaign-stats">
+                                                    <div class="stat">
+                                                        <i class="fas fa-users"></i>
+                                                        <span>0 Recipients</span>
+                                                    </div>
+                                                    <div class="stat">
+                                                        <i class="fas fa-check-circle"></i>
+                                                        <span>0 Completed</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="campaign-actions">
+                                                <button class="action-btn" title="Edit Campaign">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="action-btn" title="Delete Campaign">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        `;
+                                        campaignsGrid.insertBefore(newCampaignCard, campaignsGrid.firstChild);
+                                    }
+
+                                    // Remove the create campaign button
+                                    createCampaignBtn.remove();
+                                } else {
+                                    throw new Error(result.error || 'Failed to create campaign');
+                                }
+                            } catch (error) {
+                                console.error('Error creating campaign:', error);
+                                addAICampaignMessage(`
+                                    <div style="background: #fff5f5; padding: 1rem; border-radius: 0.5rem; margin-top: 0.5rem;">
+                                        <strong>Error!</strong> ${error.message}
+                                    </div>
+                                `, 'assistant');
+                                
+                                // Reset the button
+                                createCampaignBtn.disabled = false;
+                                createCampaignBtn.textContent = 'Create This Campaign';
+                            }
+                        };
+                        aiCampaignMessages.appendChild(createCampaignBtn);
+                    } catch (e) {
+                        console.error('Error parsing AI response:', e, data.response);
+                        // If parsing fails, show the response as is
                         addAICampaignMessage(data.response, 'assistant');
-
-                        // Update current step based on the previous step
-                        if (currentStep === 'businessType') {
-                            currentStep = 'campaignTitle';
-                        } else if (currentStep === 'campaignTitle') {
-                            currentStep = 'rewardType';
-                        } else if (currentStep === 'rewardType') {
-                            currentStep = 'duration';
-                        }
-                    } else {
-                        throw new Error('No response from API');
                     }
                 } else {
-                    // Remove typing indicator
-                    typingMessage.remove();
-                    // Show create campaign button
-                    const createCampaignBtn = document.createElement('button');
-                    createCampaignBtn.className = 'create-campaign-btn';
-                    createCampaignBtn.style.display = 'block';
-                    createCampaignBtn.textContent = 'Create Campaign';
-                    createCampaignBtn.onclick = function() {
-                        // Store campaign data in sessionStorage
-                        sessionStorage.setItem('aiCampaignData', JSON.stringify(campaignData));
-                        // Redirect to create campaign page
-                        window.location.href = '{% url "create_campaign" %}';
-                    };
-                    aiCampaignMessages.appendChild(createCampaignBtn);
+                    console.error('Empty response from server');
+                    throw new Error('No response data received');
                 }
             } catch (error) {
-                console.log("error here");
-                console.error('Error:', error);
+                console.error('Campaign creation error:', error);
                 typingMessage.remove();
-                addAICampaignMessage('Sorry, I encountered an error. Please try again.', 'assistant');
+                addAICampaignMessage(`
+                    I encountered an error while creating your campaign. Here are some tips:
+                    <br>- Make sure your request includes campaign details
+                    <br>- Try to be more specific about rewards and duration
+                    <br>- Avoid using special characters
+                    <br><br>Please try again with a simpler request.
+                `, 'assistant');
             } finally {
                 sendAICampaignMessageBtn.disabled = false;
             }
@@ -1550,7 +1636,69 @@
                 sendAICampaignMessage();
             }
         });
+
+        async function createCampaign(campaignData) {
+            const button = document.getElementById('create-campaign-btn');
+            button.disabled = true;
+            button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Creating...';
+
+            try {
+                const response = await fetch('/campaigns/create_campaign_ajax/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify(campaignData)
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Add success message to chat
+                    const chatMessages = document.getElementById('chat-messages');
+                    const successMessage = document.createElement('div');
+                    successMessage.className = 'alert alert-success';
+                    successMessage.innerHTML = `
+                        <strong>Campaign Created Successfully!</strong><br>
+                        Title: ${data.campaign.title}<br>
+                        Description: ${data.campaign.description}<br>
+                        Reward Type: ${data.campaign.reward_type}<br>
+                        Duration: ${data.campaign.duration} days
+                    `;
+                    chatMessages.appendChild(successMessage);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                    // Update campaigns grid
+                    const campaignsGrid = document.getElementById('campaigns-grid');
+                    const newCampaignCard = document.createElement('div');
+                    newCampaignCard.className = 'col-md-4 mb-4';
+                    newCampaignCard.innerHTML = `
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">${data.campaign.title}</h5>
+                                <p class="card-text">${data.campaign.description}</p>
+                                <p class="card-text"><small class="text-muted">Reward: ${data.campaign.reward_type}</small></p>
+                                <p class="card-text"><small class="text-muted">Duration: ${data.campaign.duration} days</small></p>
+                            </div>
+                        </div>
+                    `;
+                    campaignsGrid.insertBefore(newCampaignCard, campaignsGrid.firstChild);
+                } else {
+                    throw new Error(data.error || 'Failed to create campaign');
+                }
+            } catch (error) {
+                const chatMessages = document.getElementById('chat-messages');
+                const errorMessage = document.createElement('div');
+                errorMessage.className = 'alert alert-danger';
+                errorMessage.textContent = `Error: ${error.message}`;
+                chatMessages.appendChild(errorMessage);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            } finally {
+                button.disabled = false;
+                button.innerHTML = 'Create This Campaign';
+            }
+        }
     </script>
-    <script src="{% static 'js/campaign-checks.js' %}"></script>
 </body>
 </html>

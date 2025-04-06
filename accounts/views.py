@@ -253,11 +253,97 @@ def ai_campaign_assistant(request):
     if request.method == 'POST':
         data = json.loads(request.body)
         prompt = data.get('prompt', '')
-        current_step = data.get('currentStep', '')
+        
+        # Create a structured prompt for the AI
+        ai_prompt = f"""
+        Create a marketing campaign based on this request: "{prompt}"
+        
+        Generate a response in the following JSON format:
+        {{
+            "campaign": {{
+                "title": "A catchy, concise campaign title",
+                "description": "A compelling description that explains the campaign benefits and mechanics",
+                "reward_type": "One of: cash, discount, points, gift",
+                "duration": "Number of days the campaign should run (e.g.,7, 10, 15, 30)",
+                "reward_amount": "The amount of the reward (e.g., 10, 20, 30)",
+                "task_type": "One of: quiz, purchase, event"
+            }},
+            
+        }}
+        
+        Make sure the response is valid JSON and includes all required fields.
+        The title should be catchy and memorable.
+        The description should be clear and engaging.
+        The reward type should match the user's request or suggest the most appropriate type.
+        The duration should be reasonable for the campaign type.
+        """
 
-        # Process the prompt based on the current step
-        response = generate_ai_campaign_response(prompt, current_step)
-        return JsonResponse({'response': response})
+        try:
+            # Make request to Gemini API
+            response = requests.post(
+                'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
+                headers={
+                    'Content-Type': 'application/json',
+                    'x-goog-api-key': settings.GEMINI_API_KEY
+                },
+                json={
+                    'contents': [{
+                        'parts': [{
+                            'text': ai_prompt
+                        }]
+                    }]
+                }
+            )
+            
+            if response.status_code != 200:
+                return JsonResponse({'error': 'API request failed'}, status=response.status_code)
+            
+            # print(response.json())
+            
+            response_data = response.json()
+            generated_text = response_data.get('candidates', [{}])[0].get('content', {}).get('parts', [{}])[0].get('text', '')
+            print(generated_text + "1")
+
+            generated_text = generated_text.replace('```json', '').replace('```', '')
+            generated_text = generated_text.strip()
+            
+
+            print(generated_text)
+            # Try to parse the response as JSON
+            try:
+                parsed_response = json.loads(generated_text)
+                
+                # Validate the response structure
+                if not isinstance(parsed_response, dict):
+                    raise ValueError("Response must be a JSON object")
+                
+                if 'campaign' not in parsed_response:
+                    raise ValueError("Response must include a 'campaign' object")
+                
+                campaign = parsed_response['campaign']
+                required_fields = ['title', 'description', 'reward_type', 'duration']
+                
+                for field in required_fields:
+                    if field not in campaign:
+                        raise ValueError(f"Campaign must include '{field}' field")
+                
+                # Convert duration to integer if it's a string
+                if isinstance(campaign['duration'], str):
+                    campaign['duration'] = int(''.join(filter(str.isdigit, campaign['duration'])))
+                
+                return JsonResponse({'response': json.dumps(parsed_response)})
+                
+            except json.JSONDecodeError as e:
+                print(f"JSON decode error: {str(e)}")
+                return JsonResponse({'response': "I couldn't create a valid campaign structure. Please try again with more specific details."})
+            except ValueError as e:
+                print(f"Validation error: {str(e)}")
+                return JsonResponse({'response': "The campaign structure was incomplete. Please try again with all required details."})
+            
+        except Exception as e:
+            print(f"Error in ai_campaign_assistant: {str(e)}")
+            return JsonResponse({'response': "I encountered an error while creating your campaign. Please try again."})
+            
     return JsonResponse({'error': 'Invalid request method'}, status=400)
 
 def generate_ai_campaign_response(prompt, current_step):
